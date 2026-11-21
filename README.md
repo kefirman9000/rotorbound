@@ -4,16 +4,25 @@ An FPV drone game for Windows (and the browser). You're a freelance drone pilot 
 
 ![Downtown](screenshots/01-downtown-skyline-fpv.png)
 
-## Play on Windows
+## Play
 
-1. Download this repo (**Code → Download ZIP**) and unzip it anywhere.
-2. Double-click **`Rotorbound.bat`**.
+- **Windows:** grab the latest **Rotorbound-vX-windows.zip** from [Releases](https://github.com/kefirman9000/rotorbound/releases/latest), unzip it, and double-click **`Rotorbound.bat`**.
+- **Browser:** https://kefirman9000.github.io/rotorbound/ (Xbox controllers work there too)
 
 The game opens in its own window and works offline. Each launch checks GitHub for a newer version and **only updates if you click Yes**.
 
+## Maps
+
+- **Rotor City:** a big sprawling city with a stunt park, a stadium, the Skyfair theme park, a river and an elevated train.
+- **Neon Canyons:** a compact 380 m vertical city built for FPV flow, with three flight bands (street canyons, facades and skybridges, rooftops up to 140 m). It has a neon crossroads under hanging signs, a scaffolding tower with a crane, a west–east rooftop chain, an alley grid with fire escapes and vertical shafts, an elevated highway with a broken middle, and a canal with two bridges on the south edge. Golden-hour sun shadows.
+
+Switch maps in **Settings → Map**.
+
+![Neon Canyons](screenshots/20-canyons-crossroads-golden-hour.png)
+
 ## What's in it
 
-- **Races (6 tracks):** City Loop, Parking Garage (climb through the floors), Bridge Run, Rooftop Run, Stunt Park Slalom and Skyfair Park. A ghost of your best lap flies alongside you, and the top 10 laps on your PC are kept for each track.
+- **Races:** 6 tracks in Rotor City (City Loop, Parking Garage, Bridge Run, Rooftop Run, Stunt Park Slalom, Skyfair Park) and 3 in Neon Canyons (Crossroads Sprint, Canyon Run, Sky Chain). A ghost of your best lap flies alongside you, and the top 10 laps on your PC are kept for each track.
 - **Courier jobs:** pick up a package on one rooftop and land it on another before par time. Heavier packages make the drone sluggish, and wind gusts get stronger up high.
 - **Free flight & tricks:** flips, rolls, power loops, corkscrews, dives, proximity runs and gaps (rings, fans, under bridges, through the tunnel, the stadium tunnel, the skeleton tower and the Ferris wheel) chain into combos. Combos pay **double in the Stunt Park**.
 - **30 hidden tokens** around the map, worth $50 each.
@@ -22,6 +31,17 @@ The game opens in its own window and works offline. Each launch checks GitHub fo
 - **Replay** of your last 30 seconds with 4 camera angles, and a **photo mode** that saves PNGs to your Downloads folder.
 
 ## Screenshots
+
+### Neon Canyons
+
+| | |
+|---|---|
+| ![Scaffolding](screenshots/21-canyons-scaffolding-tower-chase.png) | ![Rooftop chain](screenshots/22-canyons-rooftop-chain-fpv.png) |
+| ![Alley](screenshots/23-canyons-alley-fpv.png) | ![Highway](screenshots/24-canyons-highway-break-fpv.png) |
+| ![Waterfront](screenshots/25-canyons-waterfront-bridge.png) | ![Neon night](screenshots/26-canyons-neon-night.png) |
+| ![Skybridge](screenshots/27-canyons-skybridge-fpv.png) | ![Crossroads](screenshots/20-canyons-crossroads-golden-hour.png) |
+
+### Rotor City
 
 | | |
 |---|---|
@@ -57,10 +77,11 @@ The keyboard and touch controls are listed on the start screen.
 1. ✅ Flight physics, FPV camera, controls, city
 2. ✅ More tracks + ghost replay, courier jobs, time of day
 3. ✅ Busy world, stunt park, stadium, theme park, tricks, tokens, replay, photo mode
-4. Garage (frames, motors, props, batteries) to spend your earnings
-5. Film gigs + defense nights
-6. Signal range, sound and polish
-7. Online leaderboards (needs a small server)
+4. ✅ Neon Canyons map
+5. Garage (frames, motors, props, batteries) to spend your earnings
+6. Film gigs + defense nights
+7. Signal range, sound and polish
+8. Online leaderboards (needs a small server)
 
 ## Credits
 

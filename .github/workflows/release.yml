@@ -1,0 +1,31 @@
+name: Windows release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Windows zip
+        run: |
+          mkdir -p dist/Rotorbound
+          cp -r index.html lib Rotorbound.bat launcher.ps1 version.json README.md dist/Rotorbound/
+          cd dist && zip -r "Rotorbound-${GITHUB_REF_NAME}-windows.zip" Rotorbound
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Rotorbound-*-windows.zip
+          generate_release_notes: true
+          body: |
+            ## Play on Windows
+            1. Download **Rotorbound-${{ github.ref_name }}-windows.zip** below and unzip it anywhere.
+            2. Double-click **Rotorbound.bat**.
+
+            Works offline. Each launch checks for updates and only installs one if you click Yes.
+
+            Or play in your browser: https://kefirman9000.github.io/rotorbound/
+
+            ❤ Support development on [GitHub Sponsors](https://github.com/sponsors/kefirman9000)
