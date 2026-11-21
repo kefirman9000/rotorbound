@@ -1,4 +1,4 @@
 {
-  "version": "0.1.0",
-  "notes": "First playable prototype: FPV flight physics (acro + angle), Xbox controller support with rumble, city block, 8-gate lap loop."
+  "version": "0.2.0",
+  "notes": "New tracks (Parking Garage, Bridge Run, Rooftop Run) with a ghost of your best lap, courier jobs with heavy packages and wind, and day / sunset / night / cycle time of day with lit windows and a drone headlight."
 }
