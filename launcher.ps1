@@ -31,7 +31,7 @@ try {
   }
 } catch { }
 
-# --- Offline copy of the 3D engine (downloaded once) ---
+# --- 3D engine is bundled in lib/; re-download only if it's missing ---
 $lib = Join-Path $Here 'lib'
 $three = Join-Path $lib 'three.min.js'
 if (-not (Test-Path $three)) {
