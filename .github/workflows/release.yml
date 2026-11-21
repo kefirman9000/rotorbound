@@ -1,7 +1,9 @@
 name: Windows release
 on:
   push:
-    tags: ['v*']
+    branches: [main]
+    paths: ['version.json']
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -9,7 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Read version
+        id: v
+        run: echo "tag=v$(jq -r .version version.json)" >> "$GITHUB_OUTPUT"
       - name: Build Windows zip
+        env:
+          GITHUB_REF_NAME: ${{ steps.v.outputs.tag }}
         run: |
           mkdir -p dist/Rotorbound
           cp -r index.html lib Rotorbound.bat launcher.ps1 version.json README.md dist/Rotorbound/
@@ -17,11 +24,14 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.v.outputs.tag }}
+          name: Rotorbound ${{ steps.v.outputs.tag }}
+          target_commitish: ${{ github.sha }}
           files: dist/Rotorbound-*-windows.zip
           generate_release_notes: true
           body: |
             ## Play on Windows
-            1. Download **Rotorbound-${{ github.ref_name }}-windows.zip** below and unzip it anywhere.
+            1. Download **Rotorbound-${{ steps.v.outputs.tag }}-windows.zip** below and unzip it anywhere.
             2. Double-click **Rotorbound.bat**.
 
             Works offline. Each launch checks for updates and only installs one if you click Yes.
