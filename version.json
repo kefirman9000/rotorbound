@@ -1,4 +1,4 @@
 {
-  "version": "0.6.0",
-  "notes": "Controls update: Betaflight-style rates per axis with a live curve, throttle mid/expo, Horizon mode, altitude hold, full controller remapping and calibration (RC radios work), turtle mode (hold LT after a crash), rewind (hold B), Xbox trigger rumble, heavier motor feel with prop-wash wobble, and a racing line drawn from your best lap."
+  "version": "0.7.0",
+  "notes": "Map update: five new maps (Port Yard, Abandoned Factory, Canyon Valley, Ski Resort, Mall & Airport); Neon Canyons gets a subway, a spinner tower, a collapsing bridge, a car wash, a water tower climb, rooftop pools and wind turbines; weather (fog, rain with lightning, snow); helicopters and a blimp with bonus orbs; fireworks and searchlights; time-trial segments; secret vaults that open when you find every token; breakable cones, boxes, barrels and glass."
 }
