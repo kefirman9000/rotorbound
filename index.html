@@ -46,6 +46,11 @@
   .stick{position:fixed;bottom:28px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.25);display:none;z-index:4}
   .stick .knob{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(255,255,255,.35)}
   #stL{left:28px}#stR{right:28px}
+  .axbar{display:inline-block;width:120px;height:10px;background:#1d2a3a;border-radius:5px;position:relative;vertical-align:middle;margin:0 6px}
+  .axbar i{position:absolute;top:0;bottom:0;background:#3fc8ff;border-radius:5px}
+  .chip{display:inline-block;min-width:22px;padding:2px 5px;margin:2px;border-radius:5px;background:#1d2a3a;font-family:Consolas,monospace;font-size:12px;text-align:center}
+  .chip.on{background:#39ff88;color:#04150b}
+  #ctrlLive{font-family:Consolas,monospace;font-size:12px;margin-bottom:8px}
   #upd{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:#132235;border:1px solid #3fc8ff;border-radius:10px;padding:12px 16px;z-index:20;display:none;max-width:90vw;text-align:center}
   #upd button{margin:8px 6px 0;padding:6px 14px;border-radius:6px;border:0;font-weight:bold;cursor:pointer}
 </style>
@@ -89,6 +94,8 @@
           <tr><td>LB / RB</td><td>Camera uptilt − / +</td></tr>
           <tr><td>L3 (click left stick)</td><td>Replay last 30 seconds</td></tr>
           <tr><td>R3 (click right stick)</td><td>Photo mode</td></tr>
+          <tr><td>B (hold)</td><td>Rewind</td></tr>
+          <tr><td>LT (hold, crashed)</td><td>Turtle flip</td></tr>
           <tr><td>View ⧉</td><td>Reset drone</td></tr>
           <tr><td>Menu ☰</td><td>Settings / pause</td></tr>
         </table>
@@ -105,6 +112,8 @@
           <tr><td>Q / E</td><td>Camera uptilt − / +</td></tr>
           <tr><td>T</td><td>Replay last 30 seconds</td></tr>
           <tr><td>F</td><td>Photo mode</td></tr>
+          <tr><td>Backspace (hold)</td><td>Rewind</td></tr>
+          <tr><td>G (hold, crashed)</td><td>Turtle flip</td></tr>
           <tr><td>Esc</td><td>Settings / pause</td></tr>
           <tr><td>F11</td><td>Fullscreen</td></tr>
         </table>
@@ -114,6 +123,7 @@
   </div>
 </div>
 
+<div class="overlay" id="ctrl" style="display:none"><div class="panel" style="min-width:min(620px,92vw)"><h3 style="font-size:20px;margin-top:0">🎮 CONTROLLER SETUP</h3><div id="ctrlLive"></div><div id="ctrlRows"></div><div id="ctrlMsg" class="sub" style="margin:10px 0 0;font-size:13px;color:#ffd23f"></div><div class="sub" style="margin:6px 0 0;font-size:12px">D-pad / arrows to move · A / Enter to select · ◀ ▶ to change · B / Esc to close</div></div></div>
 <div class="overlay" id="menu" style="display:none"><div class="panel" style="min-width:min(540px,90vw)"><h3 style="font-size:20px;margin-top:0">⚙ SETTINGS</h3><div id="rows"></div><div class="sub" style="margin:10px 0 0;font-size:12px">D-pad / arrows to move · ◀ ▶ to change · A / Enter to select · B / Esc to close</div></div></div>
 
 <script src="lib/three.min.js"></script>
@@ -121,7 +131,7 @@
 <script>
 (function(){
 'use strict';
-const VERSION='0.5.0';
+const VERSION='0.6.0';
 const REPO='kefirman9000/rotorbound';
 const $=id=>document.getElementById(id);
 if(!window.THREE){document.body.innerHTML='<div style="padding:40px;font-size:20px">Could not load the 3D engine (lib/three.min.js is missing). Re-download Rotorbound from GitHub.</div>';return;}
@@ -133,9 +143,12 @@ $('verS').textContent='v'+VERSION;
 const store={get(k,d){try{const v=localStorage.getItem('rotorbound.'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('rotorbound.'+k,JSON.stringify(v));}catch(e){}}};
 
 // ---------------- settings ----------------
-const DEFAULTS={respawn:'safe',map:'city',shadows:true,activity:'race',track:'city',tod:'day',wind:1,ghost:true,light:'auto',traffic:true,mode:'angle',layout:'trigger',rate:670,expo:0.3,angleMax:55,tilt:25,fov:95,thrustRatio:4.5,deadzone:0.08,invertPitch:false,view:'fpv',fx:true,rumble:true,sound:true,volume:0.6};
+const DEFAULTS={rollRc:1,rollSr:0.7,rollEx:0,pitchRc:1,pitchSr:0.7,pitchEx:0,yawRc:1,yawSr:0.6,yawEx:0,thrMid:0.5,thrExpo:0,altHold:false,dzL:0.08,dzR:0.08,trigRumble:true,propWash:true,racingLine:true,bind:null,cal:null,respawn:'safe',map:'city',shadows:true,activity:'race',track:'city',tod:'day',wind:1,ghost:true,light:'auto',traffic:true,mode:'angle',layout:'trigger',rate:670,expo:0.3,angleMax:55,tilt:25,fov:95,thrustRatio:4.5,deadzone:0.08,invertPitch:false,view:'fpv',fx:true,rumble:true,sound:true,volume:0.6};
 let S=Object.assign({},DEFAULTS,store.get('settings',{}));
 function save(){store.set('settings',S);}
+const DEFAULT_BIND={thr:{t:'b',i:7,inv:false},yaw:{t:'a',i:0,inv:false},pitch:{t:'a',i:3,inv:true},roll:{t:'a',i:2,inv:false},btn:{respawn:0,view:1,lap:2,mode:3,tiltDn:4,tiltUp:5,turtle:6,reset:8,menu:9,replay:10,photo:11}};
+if(!S.bind||!S.bind.btn)S.bind=JSON.parse(JSON.stringify(DEFAULT_BIND));
+if(S.layout!=='trigger'&&S.bind.thr.t==='b')S.bind.thr={t:'a',i:1,inv:true};
 let cash=store.get('cash',0);
 function addCash(v){cash+=v;store.set('cash',cash);}
 const MAP=S.map==='canyons'?'canyons':'city';
@@ -815,7 +828,12 @@ function buildGates(){
   });
 }
 function paintGates(){if(!gates.length)return;gates.forEach((g,k)=>{if(k===nextGate){g.mat.color.set(0x39ff88);g.mat.opacity=1;}else if(k===(nextGate+1)%gates.length){g.mat.color.set(0xffd23f);g.mat.opacity=.85;}else{g.mat.color.set(0xffffff);g.mat.opacity=.45;}});}
-function loadTrackRecords(){best=store.get('best.'+S.track,null);ghostData=store.get('ghost.'+S.track,null);lastLap=null;}
+let raceLine=null;
+function buildRacingLine(){if(raceLine){scene.remove(raceLine);raceLine.geometry.dispose();raceLine=null;}
+  if(S.activity!=='race'||!S.racingLine||!ghostData||ghostData.f.length<7*8)return;
+  const f=ghostData.f,pts=[];for(let i=0;i<f.length;i+=7*3)pts.push(new V3(f[i],f[i+1]-0.15,f[i+2]));
+  const curve=new THREE.CatmullRomCurve3(pts);raceLine=new THREE.Mesh(new THREE.TubeGeometry(curve,pts.length*3,0.07,5,false),basic(0x3fc8ff,{transparent:true,opacity:0.45,depthWrite:false}));scene.add(raceLine);}
+function loadTrackRecords(){best=store.get('best.'+S.track,null);ghostData=store.get('ghost.'+S.track,null);lastLap=null;buildRacingLine();}
 function addToBoard(t){const k='board.'+S.track,b=store.get(k,[]);b.push({t:+t.toFixed(2),d:new Date().toISOString().slice(0,10)});b.sort((x,y)=>x.t-y.t);store.set(k,b.slice(0,10));}
 
 const ghost=new THREE.Group();
@@ -950,7 +968,10 @@ const inp={thr:0,yaw:0,pitch:0,roll:0};
 let source='keyboard';
 const kb={thr:0,keys:new Set(),yaw:0,pitch:0,roll:0};
 const touch={thr:0,yaw:0,pitch:0,roll:0};
-function dz(v){const d=S.deadzone,a=Math.abs(v);return a<d?0:Math.sign(v)*(a-d)/(1-d);}
+function dzv(v,d){const a=Math.abs(v);return a<d?0:Math.sign(v)*(a-d)/(1-d);}
+function dz(v){return dzv(v,S.dzL);}
+function axisRaw(ax,i){let v=ax[i]||0;const c=S.cal;if(c&&c.c&&c.c[i]!=null){const ctr=c.c[i],mn=c.mn[i],mx=c.mx[i];v=v>=ctr?(v-ctr)/Math.max(0.05,(mx??1)-ctr):(v-ctr)/Math.max(0.05,ctr-(mn??-1));}return Math.max(-1,Math.min(1,v));}
+function axisN(ax,i){return dzv(axisRaw(ax,i),i<2?S.dzL:S.dzR);}
 let gpIndex=null,prevBtn=[],gpName='';
 addEventListener('gamepadconnected',e=>{gpIndex=e.gamepad.index;gpName=e.gamepad.id;toast('🎮 Controller connected');updPad();});
 addEventListener('gamepaddisconnected',e=>{if(gpIndex===e.gamepad.index){gpIndex=null;toast('Controller disconnected');updPad();}});
@@ -960,12 +981,13 @@ function rumble(strong,weak,ms){if(!S.rumble)return;const p=getPad();const a=p&&
 const hoverThr=()=>1/S.thrustRatio;
 function restartOrNewJob(){if(S.activity==='courier')newJob();else if(S.activity==='race'){nextGate=0;lapStart=null;rec=[];paintGates();toast('Lap restarted');}}
 const pad={lx:0,ly:0,rx:0,ry:0,lt:0,rt:0};
-let navHold={dir:0,t:0};
+let navHold={dir:0,t:0},viewHold=0,rewindHeld=false,kbRewind=false,turtleHeld=false;
 function pollPad(dt){
   const p=getPad();if(!p){pad.lx=pad.ly=pad.rx=pad.ry=pad.lt=pad.rt=0;return;}
   const ax=p.axes,b=p.buttons;const bv=i=>b[i]?(b[i].value||(b[i].pressed?1:0)):0;
   const pressed=i=>bv(i)>0.5&&!(prevBtn[i]>0.5);
-  pad.lx=dz(ax[0]||0);pad.ly=dz(ax[1]||0);pad.rx=dz(ax[2]||0);pad.ry=dz(ax[3]||0);pad.lt=bv(6);pad.rt=bv(7);
+  pad.lx=axisN(ax,0);pad.ly=axisN(ax,1);pad.rx=axisN(ax,2);pad.ry=axisN(ax,3);pad.lt=bv(6);pad.rt=bv(7);
+  if(CT.open){ctrlPoll(p,dt,pressed,bv);prevBtn=b.map(x=>x?(x.value||(x.pressed?1:0)):0);return;}
   if(menuOpen){
     let dir=0;if(bv(12)>.5||ax[1]<-.6)dir=-1;else if(bv(13)>.5||ax[1]>.6)dir=1;
     let side=0;if(bv(14)>.5||ax[0]<-.6)side=-1;else if(bv(15)>.5||ax[0]>.6)side=1;
@@ -981,29 +1003,35 @@ function pollPad(dt){
   }else if(RB.on){
     if(pressed(1))RB.cam=(RB.cam+1)%4;if(pressed(0)||pressed(10)||pressed(9))exitReplay();if(pressed(2))RB.paused=!RB.paused;
   }else{
-    let thr;
-    if(S.layout==='trigger')thr=pad.rt;
-    else if(S.layout==='stick')thr=(1-pad.ly)/2;
-    else{const up=-pad.ly,h=hoverThr();thr=up>=0?h+up*(1-h):h*(1+up);}
-    const active=Math.abs(pad.lx)+Math.abs(pad.ly)+Math.abs(pad.rx)+Math.abs(pad.ry)+pad.rt>0.05||b.some(x=>x&&x.pressed);
+    const B=S.bind,val=bd=>bd.t==='b'?bv(bd.i):axisN(ax,bd.i)*(bd.inv?-1:1),btn=a=>B.btn[a];
+    const tv=val(B.thr);let thr;
+    if(S.layout==='trigger')thr=Math.max(0,tv);
+    else if(S.layout==='stick')thr=(tv+1)/2;
+    else{const h=hoverThr();thr=tv>=0?h+tv*(1-h):h*(1+tv);}
+    const yaw=val(B.yaw),roll=val(B.roll),pitch=val(B.pitch);
+    const active=Math.abs(yaw)+Math.abs(roll)+Math.abs(pitch)+(S.layout==='trigger'?thr:Math.abs(tv))>0.05||b.some(x=>x&&x.pressed);
     if(active)source='controller';
-    if(source==='controller'){inp.thr=Math.max(0,Math.min(1,thr));inp.yaw=pad.lx;inp.roll=pad.rx;inp.pitch=-pad.ry*(S.invertPitch?-1:1);}
-    if(pressed(0)&&D.crashed)respawnAfterCrash();
-    if(pressed(1))toggleView();
-    if(pressed(3))toggleMode();
-    if(pressed(2))restartOrNewJob();
-    if(pressed(4))setTilt(S.tilt-5);
-    if(pressed(5))setTilt(S.tilt+5);
-    if(pressed(8))resetDrone();
-    if(pressed(9))openMenu();
-    if(pressed(10))enterReplay();
-    if(pressed(11))enterPhoto();
+    if(source==='controller'){inp.thr=Math.max(0,Math.min(1,thr));inp.yaw=yaw;inp.roll=roll;inp.pitch=pitch*(S.invertPitch?-1:1);}
+    // view button: tap = camera, hold = rewind
+    const vb=bv(btn('view'))>0.5;
+    if(vb){viewHold+=dt;if(viewHold>0.3)rewindHeld=true;}else{if(viewHold>0&&viewHold<=0.3)toggleView();viewHold=0;rewindHeld=kbRewind;}
+    turtleHeld=bv(btn('turtle'))>0.5||K('g')===1;
+    if(pressed(btn('respawn'))&&D.crashed)respawnAfterCrash();
+    if(pressed(btn('mode')))toggleMode();
+    if(pressed(btn('lap')))restartOrNewJob();
+    if(pressed(btn('tiltDn')))setTilt(S.tilt-5);
+    if(pressed(btn('tiltUp')))setTilt(S.tilt+5);
+    if(pressed(btn('reset')))resetDrone();
+    if(pressed(btn('menu')))openMenu();
+    if(pressed(btn('replay')))enterReplay();
+    if(pressed(btn('photo')))enterPhoto();
   }
   prevBtn=b.map(x=>x?(x.value||(x.pressed?1:0)):0);
 }
 addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
-  if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
+  if(['arrowup','arrowdown','arrowleft','arrowright',' ','backspace'].includes(k))e.preventDefault();
+  if(CT.open){ctrlKey(k);return;}
   if(menuOpen){if(k==='arrowup'||k==='w')menuNav(-1,0);else if(k==='arrowdown'||k==='s')menuNav(1,0);else if(k==='arrowleft'||k==='a')menuNav(0,-1);else if(k==='arrowright'||k==='d')menuNav(0,1);else if(k==='enter'||k===' ')menuActivate();else if(k==='escape'||k==='p')closeMenu();return;}
   if(!started){if(k==='enter'||k===' ')startGame();return;}
   kb.keys.add(k);
@@ -1013,12 +1041,13 @@ addEventListener('keydown',e=>{
   source='keyboard';
   if(k==='r')resetDrone();else if(k==='c')toggleView();else if(k==='m')toggleMode();else if(k==='q')setTilt(S.tilt-5);else if(k==='e')setTilt(S.tilt+5);
   else if(k===' ')kb.thr=hoverThr();else if(k==='l')restartOrNewJob();else if(k==='t')enterReplay();else if(k==='f')enterPhoto();
-  else if(k==='escape'||k==='p')openMenu();else if(k==='enter'&&D.crashed)respawnAfterCrash();
+  else if(k==='escape'||k==='p')openMenu();else if(k==='enter'&&D.crashed)respawnAfterCrash();else if(k==='backspace'){kbRewind=true;rewindHeld=true;}
 });
-addEventListener('keyup',e=>kb.keys.delete(e.key.toLowerCase()));
+addEventListener('keyup',e=>{const k=e.key.toLowerCase();kb.keys.delete(k);if(k==='backspace'){kbRewind=false;rewindHeld=false;}});
 addEventListener('blur',()=>kb.keys.clear());
 const K=k=>kb.keys.has(k)?1:0;
 function pollKeyboard(dt){
+  if(source==='keyboard')turtleHeld=K('g')===1;
   if(source!=='keyboard')return;
   kb.thr=Math.max(0,Math.min(1,kb.thr+(K('w')-K('s'))*0.8*dt));
   const ease=(cur,tgt)=>cur+(tgt-cur)*Math.min(1,dt*7);
@@ -1040,7 +1069,7 @@ function pollTouch(){if(source!=='touch')return;inp.thr=touch.thr;inp.yaw=touch.
 $('bMenu').onclick=()=>openMenu();$('bView').onclick=()=>toggleView();$('bMode').onclick=()=>toggleMode();$('bReset').onclick=()=>D.crashed?respawnAfterCrash():resetDrone();$('bReplay').onclick=()=>RB.on?exitReplay():enterReplay();$('bPhoto').onclick=()=>PH.on?takePhoto():enterPhoto();
 
 function toggleView(){S.view=S.view==='fpv'?'chase':'fpv';save();toast(S.view==='fpv'?'FPV camera':'Chase camera');}
-function toggleMode(){S.mode=S.mode==='acro'?'angle':'acro';if(S.mode==='angle')syncHeading();save();toast(S.mode==='acro'?'ACRO mode (flips & rolls)':'ANGLE mode (self-level)');rumble(0,0.3,80);}
+function toggleMode(){S.mode=S.mode==='angle'?'horizon':S.mode==='horizon'?'acro':'angle';if(S.mode==='angle')syncHeading();save();toast({acro:'ACRO mode (flips & rolls)',horizon:'HORIZON mode (levels at center stick, flips at full stick)',angle:'ANGLE mode (self-level)'}[S.mode]);rumble(0,0.3,80);}
 function setTilt(t){S.tilt=Math.max(0,Math.min(50,t));save();toast('Camera uptilt '+S.tilt+'°');}
 const _e=new THREE.Euler();
 function syncHeading(){_e.setFromQuaternion(D.q,'YXZ');D.heading=_e.y;}
@@ -1058,12 +1087,15 @@ function updWind(){
 
 // ---------------- physics ----------------
 const _v=new V3(),_v2=new V3(),_q=new QT(),_q2=new QT(),_tgtW=new V3(),_rel=new V3();
-function rateCurve(x){const e=S.expo;return (x*(1-e)+x*x*x*e)*S.rate*DEG;}
+// Betaflight "actual" rates: RC rate, super rate, expo per axis
+function bfRate(x,rc,sr,ex){const a=Math.abs(x),xe=x*a*a*a*ex+x*(1-ex);let r=200*rc*xe;if(sr>0)r/=Math.max(0.01,1-Math.abs(xe)*sr);return Math.max(-1998,Math.min(1998,r))*DEG;}
+function rateOf(ax,x){return bfRate(x,S[ax+'Rc'],S[ax+'Sr'],S[ax+'Ex']);}
+function thrCurve(x){const m=S.thrMid,e=S.thrExpo,t=x-m,rng=t>0?1-m:m,n=rng>0?t/rng:0;return Math.max(0,Math.min(1,m+t*(1-e+e*n*n)));}
 function crash(){
   if(D.crashed)return;D.crashed=true;D.crashT=0;D.spin.set((Math.random()-.5)*20,(Math.random()-.5)*20,(Math.random()-.5)*20);staticLvl=1;rumble(1,1,350);sfxCrash();
   if(S.activity==='courier'&&job.state==='deliver'){job.state='failed';markB.visible=false;pkg.visible=false;toast('💥 Package destroyed');}
   if(T.combo.length){toast('💥 COMBO LOST ('+T.combo.length+' tricks)');T.combo=[];T.pts=0;}
-  $('banner').textContent='CRASHED\n'+(source==='controller'?'A respawn · View restart':source==='touch'?'tap ↺ to respawn':'Enter respawn · R restart');
+  $('banner').textContent='CRASHED\n'+(source==='controller'?'A respawn · hold LT turtle · View restart':source==='touch'?'tap ↺ to respawn':'Enter respawn · hold G turtle · R restart');
 }
 function collide(){
   D.grounded=false;D.near=99;
@@ -1086,7 +1118,7 @@ function collide(){
     if(ny>0.7)D.grounded=true;
   }
 }
-let lastGraze=-9;
+let lastGraze=-9,washF=0;
 function graze(sp){if(simT-lastGraze>0.18){rumble(0.25,0.55,90);sfxGraze();if(sp>4)toast('Clipped it!');}lastGraze=simT;shake=Math.max(shake,0.7);
   D.w.x+=(Math.random()-.5)*7;D.w.z+=(Math.random()-.5)*7;if(S.mode!=='acro'){_e.set((Math.random()-.5)*0.25,0,(Math.random()-.5)*0.25);_q2.setFromEuler(_e);D.q.multiply(_q2);}}
 function rampCollide(c){const r=c.ramp;if(D.pos.x<c.min.x-R||D.pos.x>c.max.x+R||D.pos.z<c.min.z-R||D.pos.z>c.max.z+R)return;
@@ -1098,8 +1130,14 @@ function rampCollide(c){const r=c.ramp;if(D.pos.x<c.min.x-R||D.pos.x>c.max.x+R||
   D.grounded=true;}
 function physics(dt){
   simT+=dt;D.prev.copy(D.pos);
+  if(D.crashed&&turtleHeld&&(D.grounded||D.turtling)&&D.crashT>0.4){D.turtling=true;
+    const up=_v.copy(UP).applyQuaternion(D.q);
+    if(up.y>0.8){D.turtling=false;D.crashed=false;D.spin.set(0,0,0);D.w.set(0,0,0);syncHeading();$('banner').textContent='';staticLvl=0.3;toast('🐢 Turtle flip! Back in the air');return;}
+    const axv=_v2.copy(up).cross(UP);if(axv.lengthSq()<1e-6)axv.set(1,0,0);axv.normalize();_q.setFromAxisAngle(axv,4*dt);D.q.premultiply(_q).normalize();
+    D.vel.multiplyScalar(0.9);D.motor=0.35;collide();return;
+  }
   if(D.crashed){
-    D.crashT+=dt;
+    D.crashT+=dt;D.turtling=false;
     if(!D.grounded){const s=D.spin.length();if(s>1e-4){_q.setFromAxisAngle(_v.copy(D.spin).divideScalar(s),s*dt);D.q.multiply(_q);}}else D.spin.multiplyScalar(0.9);
     D.motor+=(0-D.motor)*Math.min(1,dt*6);
     D.vel.y-=G*dt;D.vel.multiplyScalar(1-0.4*dt);D.pos.addScaledVector(D.vel,dt);collide();
@@ -1107,8 +1145,9 @@ function physics(dt){
     return;
   }
   const cargo=S.activity==='courier'&&job.state==='deliver'?job.m:0;
-  if(S.mode==='acro'){
-    _tgtW.set(-rateCurve(inp.pitch),-rateCurve(inp.yaw)*0.85,-rateCurve(inp.roll));
+  if(S.mode==='acro'||S.mode==='horizon'){
+    _tgtW.set(-rateOf('pitch',inp.pitch),-rateOf('yaw',inp.yaw),-rateOf('roll',inp.roll));
+    if(S.mode==='horizon'){const str=Math.max(0,1-Math.max(Math.abs(inp.pitch),Math.abs(inp.roll))*1.3);if(str>0){_q2.copy(D.q).invert();const bu=_v2.copy(UP).applyQuaternion(_q2);_tgtW.x+=bu.z*7*str;_tgtW.z+=-bu.x*7*str;}}
     D.w.lerp(_tgtW,1-Math.exp(-30/(1+2*cargo)*dt));
     const s=D.w.length();if(s>1e-6){_q.setFromAxisAngle(_v.copy(D.w).divideScalar(s),s*dt);D.q.multiply(_q).normalize();}
   }else{
@@ -1116,9 +1155,16 @@ function physics(dt){
     _e.set(-inp.pitch*S.angleMax*DEG,D.heading,-inp.roll*S.angleMax*DEG,'YXZ');
     _q2.setFromEuler(_e);D.q.slerp(_q2,1-Math.exp(-9/(1+cargo)*dt));D.w.set(0,0,0);
   }
-  if(D.grace>0)D.grace-=dt;const tIn=D.grace>0?Math.max(inp.thr,hoverThr()):inp.thr;
-  D.motor+=(tIn-D.motor)*(1-Math.exp(-22*dt));
   const up=_v.copy(UP).applyQuaternion(D.q);
+  if(D.grace>0)D.grace-=dt;
+  let tIn=thrCurve(inp.thr);
+  if(S.altHold&&S.mode!=='acro'){const mid=S.layout==='hover'?hoverThr():0.5,cmd=inp.thr>=mid?(inp.thr-mid)/(1-mid):(inp.thr-mid)/mid;const vzT=cmd*7;tIn=Math.max(0,Math.min(1,(G+4.5*(vzT-D.vel.y))*(1+cargo)/(S.thrustRatio*G)/Math.max(0.35,up.y)));}
+  if(D.grace>0)tIn=Math.max(tIn,hoverThr());
+  const chop=D.motor-tIn;
+  D.motor+=(tIn-D.motor)*(1-Math.exp(-14*dt));
+  // prop wash: descending into your own wash, or chopping throttle hard, shakes the quad
+  if(S.propWash){let pw=(D.vel.y<-3&&D.motor>0.12)?Math.min(1,(-D.vel.y-3)/8)*(0.5+D.motor):0;if(chop>0.3)pw+=0.4;
+    if(pw>0.02){if(S.mode==='angle'){_e.set((Math.random()-.5)*0.06*pw,0,(Math.random()-.5)*0.06*pw);_q2.setFromEuler(_e);D.q.multiply(_q2);}else{D.w.x+=(Math.random()-.5)*pw*1.6;D.w.z+=(Math.random()-.5)*pw*1.6;}}washF=pw;}
   const thrust=D.motor*S.thrustRatio*G/(1+cargo);
   _rel.copy(D.vel).sub(wind);const rs=_rel.length();
   _v2.copy(up).multiplyScalar(thrust);_v2.y-=G;
@@ -1140,7 +1186,7 @@ function passGate(){
   if(nextGate===0){
     if(lapStart!==null){
       lastLap=simT-lapStart;const nb=best==null||lastLap<best;addToBoard(lastLap);
-      if(nb){best=lastLap;store.set('best.'+S.track,best);recordFrame();ghostData={t:lastLap,f:rec};store.set('ghost.'+S.track,ghostData);}
+      if(nb){best=lastLap;store.set('best.'+S.track,best);recordFrame();ghostData={t:lastLap,f:rec};store.set('ghost.'+S.track,ghostData);buildRacingLine();}
       toast((nb?'🏆 NEW BEST ':'LAP ')+fmtT(lastLap));rumble(0.6,0.8,250);
     }
     lapStart=simT;rec=[];
@@ -1304,7 +1350,7 @@ function updOSD(){
   const fpv=S.view==='fpv';
   const sp=D.vel.length()*3.6,alt=Math.max(0,D.pos.y-R);
   const volt=(16.8-D.motor*1.5-Math.min(1.2,flightT/600)).toFixed(1);
-  $('oTL').textContent=(S.mode==='acro'?'ACRO':'ANGL')+'\n'+fmtT(flightT).slice(0,-3)+'\n◆ '+gotTokens.size+'/'+tokens.length;
+  $('oTL').textContent=({acro:'ACRO',horizon:'HORZ',angle:'ANGL'}[S.mode]||'ANGL')+(S.altHold&&S.mode!=='acro'?' ALT':'')+'\n'+fmtT(flightT).slice(0,-3)+'\n◆ '+gotTokens.size+'/'+tokens.length;
   let tc='',tr='';
   if(S.activity==='race'){
     tc=TRACKS[S.track].name.toUpperCase()+'\n'+(lapStart!==null?'LAP '+fmtT(simT-lapStart):'FLY THROUGH THE GREEN GATE')+'\nLAST '+fmtT(lastLap)+'  BEST '+fmtT(best);
@@ -1351,6 +1397,7 @@ const ROWS=[
   {k:'track',l:'Track',o:TRACK_IDS.map(id=>[id,TRACKS[id].name])},
   {info:'board'},
   {k:'ghost',l:'Ghost of best lap',b:1},
+  {k:'racingLine',l:'Racing line (from best lap)',b:1},
   {k:'tod',l:'Time of day',o:[['day','Day'],['sunset','Sunset'],['night','Night'],['cycle','Day/night cycle']]},
   {k:'wind',l:'Wind (courier & free)',o:[[0,'Off'],[1,'Light'],[2,'Strong']]},
   {k:'traffic',l:'Traffic',b:1},
@@ -1359,13 +1406,16 @@ const ROWS=[
   {k:'light',l:'Drone headlight',o:[['auto','Auto (dark)'],['on','On'],['off','Off']]},
   {a:'replay',l:'⏪ Replay last 30 seconds'},{a:'photo',l:'📷 Photo mode'},
   {h:'FLYING'},
-  {k:'mode',l:'Flight mode',o:[['angle','Angle (self-level)'],['acro','Acro (flips & rolls)']]},
-  {k:'layout',l:'Controller throttle',o:[['trigger','Right trigger (RT)'],['hover','Left stick · center = hover'],['stick','Left stick · center = 50%']]},
-  {k:'rate',l:'Acro rates (°/s)',min:200,max:1200,st:10,f:v=>v.toFixed(0)},
-  {k:'expo',l:'Expo',min:0,max:0.9,st:0.05,f:v=>v.toFixed(2)},
+  {k:'mode',l:'Flight mode',o:[['angle','Angle (self-level)'],['horizon','Horizon (level + flips)'],['acro','Acro (flips & rolls)']]},
+  {k:'altHold',l:'Altitude hold (Angle/Horizon)',b:1},
+  {k:'layout',l:'Throttle style',o:[['trigger','Trigger (RT)'],['hover','Stick · center = hover'],['stick','Stick / RC radio · full range']]},
+  {k:'thrMid',l:'Throttle mid',min:0.2,max:0.8,st:0.05,f:v=>v.toFixed(2)},
+  {k:'thrExpo',l:'Throttle expo',min:0,max:1,st:0.05,f:v=>v.toFixed(2)},
+  {h:'RATES (Betaflight actual)'},{info:'rates'},{k:'rollRc',l:'Roll RC rate',min:0.2,max:2.55,st:0.05,f:v=>v.toFixed(2)},{k:'rollSr',l:'Roll super rate',min:0,max:0.95,st:0.05,f:v=>v.toFixed(2)},{k:'rollEx',l:'Roll expo',min:0,max:1,st:0.05,f:v=>v.toFixed(2)},{k:'pitchRc',l:'Pitch RC rate',min:0.2,max:2.55,st:0.05,f:v=>v.toFixed(2)},{k:'pitchSr',l:'Pitch super rate',min:0,max:0.95,st:0.05,f:v=>v.toFixed(2)},{k:'pitchEx',l:'Pitch expo',min:0,max:1,st:0.05,f:v=>v.toFixed(2)},{k:'yawRc',l:'Yaw RC rate',min:0.2,max:2.55,st:0.05,f:v=>v.toFixed(2)},{k:'yawSr',l:'Yaw super rate',min:0,max:0.95,st:0.05,f:v=>v.toFixed(2)},{k:'yawEx',l:'Yaw expo',min:0,max:1,st:0.05,f:v=>v.toFixed(2)},
   {k:'angleMax',l:'Angle mode max tilt',min:20,max:80,st:5,f:v=>v+'°'},
   {k:'thrustRatio',l:'Power (thrust : weight)',min:2,max:8,st:0.5,f:v=>v.toFixed(1)+':1'},
-  {k:'deadzone',l:'Stick deadzone',min:0,max:0.3,st:0.01,f:v=>v.toFixed(2)},
+  {a:'ctrl',l:'🎮 Controller setup, remap & calibrate'},
+  {k:'propWash',l:'Prop wash wobble',b:1},
   {k:'invertPitch',l:'Invert pitch',b:1},
   {h:'CAMERA & SOUND'},
   {k:'view',l:'Camera',o:[['fpv','FPV'],['chase','Chase']]},
@@ -1373,6 +1423,7 @@ const ROWS=[
   {k:'fov',l:'Field of view',min:60,max:130,st:1,f:v=>v+'°'},
   {k:'fx',l:'Video feed effects',b:1},
   {k:'rumble',l:'Controller rumble',b:1},
+  {k:'trigRumble',l:'Trigger rumble (Xbox)',b:1},
   {k:'sound',l:'Sound',b:1},
   {k:'volume',l:'Volume',min:0,max:1,st:0.05,f:v=>Math.round(v*100)+'%'},
   {h:''},
@@ -1383,10 +1434,16 @@ const skip=r=>('h' in r)||('info' in r);
 function valText(r){const v=S[r.k];if(r.o){const o=r.o.find(x=>x[0]===v);return o?o[1]:String(v);}if(r.b)return v?'ON':'OFF';return r.f(v);}
 function boardText(){const b=store.get('board.'+S.track,[]);if(!b.length)return '🏁 '+TRACKS[S.track].name+' leaderboard: no laps yet';return '🏁 '+TRACKS[S.track].name+' · top laps on this PC\n'+b.slice(0,5).map((e,i)=>`  ${i+1}. ${fmtT(e.t)}   ${e.d}`).join('\n');}
 function renderMenu(){
-  $('rows').innerHTML=ROWS.map((r,i)=>('h' in r)?`<div class="row hd">${r.h}</div>`:('info' in r)?`<div class="row info">${boardText()}</div>`:r.a?`<div class="row act${i===focus?' f':''}" data-i="${i}">${r.a==='sponsor'?`<a href="https://github.com/sponsors/kefirman9000" target="_blank" rel="noopener">${r.l}</a>`:r.l}</div>`:`<div class="row${i===focus?' f':''}" data-i="${i}"><span>${r.l}</span><span class="v"><span data-d="-1">◀</span>${valText(r)}<span data-d="1">▶</span></span></div>`).join('')+
+  $('rows').innerHTML=ROWS.map((r,i)=>('h' in r)?`<div class="row hd">${r.h}</div>`:('info' in r)?(r.info==='rates'?`<div class="row info"><canvas id="rateCv" width="460" height="130" style="width:100%;max-width:460px"></canvas></div>`:`<div class="row info">${boardText()}</div>`):r.a?`<div class="row act${i===focus?' f':''}" data-i="${i}">${r.a==='sponsor'?`<a href="https://github.com/sponsors/kefirman9000" target="_blank" rel="noopener">${r.l}</a>`:r.l}</div>`:`<div class="row${i===focus?' f':''}" data-i="${i}"><span>${r.l}</span><span class="v"><span data-d="-1">◀</span>${valText(r)}<span data-d="1">▶</span></span></div>`).join('')+
     `<div class="sub" style="text-align:center;margin:8px 0 0;font-size:12px">Rotorbound v${VERSION} · earnings ${fmtCash(cash)} · tokens ${gotTokens.size}/${tokens.length} · trick score ${T.total.toLocaleString()}</div>`;
   const el=$('rows').querySelector('.row.f');if(el)el.scrollIntoView({block:'nearest'});
+  drawRates();
 }
+function drawRates(){const cv=$('rateCv');if(!cv)return;const g=cv.getContext('2d'),W=cv.width,H=cv.height;g.clearRect(0,0,W,H);
+  const axes=[['roll','#ff2d95'],['pitch','#39ff88'],['yaw','#3fc8ff']],mx=Math.max(...axes.map(([a])=>rateOf(a,1)/DEG),200);
+  g.strokeStyle='#2c3e55';g.lineWidth=1;for(let k=0;k<=4;k++){const y=H-12-(H-24)*k/4;g.beginPath();g.moveTo(30,y);g.lineTo(W-4,y);g.stroke();}
+  g.fillStyle='#8fa6c0';g.font='10px Consolas,monospace';g.fillText(Math.round(mx)+'°/s',2,12);g.fillText('0',18,H-10);g.fillText('stick →',W-48,H-2);
+  axes.forEach(([a,c],k)=>{g.strokeStyle=c;g.lineWidth=2;g.beginPath();for(let i=0;i<=60;i++){const x=i/60,y=rateOf(a,x)/DEG;const px=30+(W-34)*x,py=H-12-(H-24)*y/mx;i?g.lineTo(px,py):g.moveTo(px,py);}g.stroke();g.fillStyle=c;g.fillText(a.toUpperCase()+' '+Math.round(rateOf(a,1)/DEG)+'°/s',40+k*130,24);});}
 $('rows').addEventListener('click',e=>{const row=e.target.closest('.row');if(!row||row.dataset.i==null)return;focus=+row.dataset.i;const d=e.target.dataset.d;if(d)change(ROWS[focus],+d);else if(ROWS[focus].a!=='sponsor')menuActivate();renderMenu();});
 function change(r,d){
   if(r.a||skip(r))return;
@@ -1394,6 +1451,8 @@ function change(r,d){
   else if(r.b)S[r.k]=!S[r.k];
   else S[r.k]=Math.round(Math.max(r.min,Math.min(r.max,S[r.k]+d*r.st))*1000)/1000;
   if(r.k==='mode'&&S.mode==='angle')syncHeading();
+  if(r.k==='layout'){if(S.layout==='trigger'&&S.bind.thr.t!=='b')S.bind.thr={t:'b',i:7,inv:false};if(S.layout!=='trigger'&&S.bind.thr.t==='b')S.bind.thr={t:'a',i:1,inv:true};}
+  if(r.k==='racingLine')buildRacingLine();
   if(r.k==='map'||r.k==='shadows'){if(r.k==='map'&&S.map==='canyons'&&S.tod==='day')S.tod='sunset';save();$('menu').innerHTML='<div class="panel">Loading '+(S.map==='canyons'?'Neon Canyons':'Rotor City')+'…</div>';setTimeout(()=>location.reload(),50);return;}
   if(r.k==='activity'||r.k==='track'){if(r.k==='track'&&S.activity!=='race')S.activity='race';setupActivity();}
   save();renderMenu();
@@ -1405,6 +1464,7 @@ function menuActivate(){
   if(r.a==='resume')closeMenu();
   else if(r.a==='reset'){resetDrone();closeMenu();}
   else if(r.a==='replay'){closeMenu();enterReplay();}
+  else if(r.a==='ctrl'){closeMenu();openCtrl();}
   else if(r.a==='photo'){closeMenu();enterPhoto();}
   else if(r.a==='clearGhost'){store.set('best.'+S.track,null);store.set('ghost.'+S.track,null);store.set('board.'+S.track,[]);loadTrackRecords();renderMenu();toast('Cleared records for '+TRACKS[S.track].name);}
   else if(r.a==='defaults'){S=Object.assign({},DEFAULTS);save();setupActivity();renderMenu();toast('Defaults restored');}
@@ -1413,6 +1473,55 @@ function menuActivate(){
 }
 function openMenu(){if(!started)return;if(RB.on)exitReplay();if(PH.on)exitPhoto();menuOpen=true;if(skip(ROWS[focus]))focus=1;$('menu').style.display='flex';renderMenu();}
 function closeMenu(){menuOpen=false;$('menu').style.display='none';}
+
+// ---------------- controller setup / remap / calibration ----------------
+const CT={open:false,focus:0,cap:null,calStep:0,cal:null,nav:{dir:0,t:0}};
+const AX_ACTS=[['thr','Throttle','push the throttle stick UP (or press the trigger)'],['yaw','Yaw','push yaw RIGHT'],['pitch','Pitch','push pitch FORWARD / UP'],['roll','Roll','push roll RIGHT']];
+const BTN_ACTS=[['respawn','Respawn after crash'],['view','Camera (tap) / Rewind (hold)'],['mode','Flight mode'],['lap','Restart lap / new job'],['tiltDn','Camera tilt −'],['tiltUp','Camera tilt +'],['turtle','Turtle mode (hold)'],['reset','Reset to start'],['menu','Settings'],['replay','Replay'],['photo','Photo mode']];
+const BTN_NAMES=['A','B','X','Y','LB','RB','LT','RT','View','Menu','L3','R3','D↑','D↓','D←','D→','Guide'];
+function ctrlRowsDef(){return [...AX_ACTS.map(([k,l])=>({type:'axis',k,l})),{type:'dz',k:'dzL',l:'Left stick deadzone'},{type:'dz',k:'dzR',l:'Right stick deadzone'},{type:'act',k:'cal',l:'⊕ Calibrate sticks (for RC radios / drifting sticks)'},{type:'act',k:'clearcal',l:'Clear calibration'},...BTN_ACTS.map(([k,l])=>({type:'btn',k,l})),{type:'act',k:'defaults',l:'Restore default mapping'},{type:'act',k:'close',l:'✔ Done'}];}
+function bindText(bd){return bd.t==='b'?(BTN_NAMES[bd.i]||'Button '+bd.i):'Axis '+bd.i+(bd.inv?' (inverted)':'');}
+function openCtrl(){CT.open=true;CT.focus=0;CT.cap=null;CT.calStep=0;$('ctrl').style.display='flex';$('ctrlMsg').textContent='';renderCtrl();}
+function closeCtrl(){CT.open=false;CT.cap=null;$('ctrl').style.display='none';save();}
+function renderCtrl(){const rows=ctrlRowsDef();$('ctrlRows').innerHTML=rows.map((r,i)=>{const f=i===CT.focus?' f':'';
+  if(r.type==='axis')return `<div class="row${f}" data-i="${i}"><span>${r.l}</span><span class="v">${CT.cap&&CT.cap.k===r.k?'… waiting':bindText(S.bind[r.k])}</span></div>`;
+  if(r.type==='btn')return `<div class="row${f}" data-i="${i}"><span>${r.l}</span><span class="v">${CT.cap&&CT.cap.k===r.k?'… press a button':(BTN_NAMES[S.bind.btn[r.k]]||'Button '+S.bind.btn[r.k])}</span></div>`;
+  if(r.type==='dz')return `<div class="row${f}" data-i="${i}"><span>${r.l}</span><span class="v"><span data-d="-1">◀</span>${S[r.k].toFixed(2)}<span data-d="1">▶</span></span></div>`;
+  return `<div class="row act${f}" data-i="${i}">${r.l}</div>`;}).join('');
+  const el=$('ctrlRows').querySelector('.row.f');if(el)el.scrollIntoView({block:'nearest'});}
+$('ctrlRows').addEventListener('click',e=>{const row=e.target.closest('.row');if(!row)return;CT.focus=+row.dataset.i;const d=e.target.dataset.d;if(d)ctrlChange(+d);else ctrlActivate();});
+function ctrlChange(d){const r=ctrlRowsDef()[CT.focus];if(r.type==='dz'){S[r.k]=Math.round(Math.max(0,Math.min(0.4,S[r.k]+d*0.01))*100)/100;save();renderCtrl();}}
+function ctrlActivate(){const r=ctrlRowsDef()[CT.focus];const msg=$('ctrlMsg');
+  if(CT.calStep){ctrlCalNext();return;}
+  if(r.type==='axis'){const p=getPad();if(!p){msg.textContent='Connect a controller first.';return;}CT.cap={k:r.k,type:'axis',base:p.axes.map((v,i)=>axisRaw(p.axes,i)),bbase:p.buttons.map(x=>x?x.value:0),t:0};msg.textContent='Now '+AX_ACTS.find(a=>a[0]===r.k)[2]+'…';renderCtrl();}
+  else if(r.type==='btn'){if(!getPad()){msg.textContent='Connect a controller first.';return;}CT.cap={k:r.k,type:'btn',t:0,armed:false};msg.textContent='Press the button you want for: '+r.l;renderCtrl();}
+  else if(r.k==='cal'){if(!getPad()){msg.textContent='Connect a controller first.';return;}CT.calStep=1;msg.textContent='Step 1/2: let go of all sticks (throttle stick at its LOWEST on a radio), then press A / Enter.';}
+  else if(r.k==='clearcal'){S.cal=null;save();msg.textContent='Calibration cleared.';}
+  else if(r.k==='defaults'){S.bind=JSON.parse(JSON.stringify(DEFAULT_BIND));if(S.layout!=='trigger')S.bind.thr={t:'a',i:1,inv:true};save();renderCtrl();msg.textContent='Default mapping restored.';}
+  else if(r.k==='close')closeCtrl();}
+function ctrlCalNext(){const p=getPad(),msg=$('ctrlMsg');if(!p)return;
+  if(CT.calStep===1){CT.cal={c:p.axes.map(v=>v),mn:p.axes.map(v=>v),mx:p.axes.map(v=>v)};
+    // a radio throttle rests at one end; treat axes resting near ±1 as centred in the middle of their range later
+    CT.calStep=2;msg.textContent='Step 2/2: move every stick to all its edges (full circles, throttle fully up and down), then press A / Enter.';}
+  else{const c=CT.cal;c.c=c.c.map((v,i)=>Math.abs(v)>0.85?(c.mn[i]+c.mx[i])/2:v);S.cal=c;CT.calStep=0;save();msg.textContent='✅ Calibrated '+c.c.length+' axes.';}}
+function ctrlPoll(p,dt,pressed,bv){
+  // live view
+  let h='';p.axes.forEach((v,i)=>{const n=axisRaw(p.axes,i);h+=`A${i} <span class="axbar"><i style="left:${n<0?50+n*50:50}%;width:${Math.abs(n)*50}%"></i></span>${n.toFixed(2)}${i%2?'<br>':' &nbsp; '}`;});
+  h+='<div>'+p.buttons.map((x,i)=>`<span class="chip${x&&x.value>0.5?' on':''}">${BTN_NAMES[i]||i}</span>`).join('')+'</div>';$('ctrlLive').innerHTML=h;
+  if(CT.calStep===2&&CT.cal){p.axes.forEach((v,i)=>{CT.cal.mn[i]=Math.min(CT.cal.mn[i],v);CT.cal.mx[i]=Math.max(CT.cal.mx[i],v);});}
+  if(CT.cap){CT.cap.t+=dt;
+    if(CT.cap.type==='btn'){const any=p.buttons.some(x=>x&&x.value>0.5);if(!CT.cap.armed){if(!any)CT.cap.armed=true;return;}const i=p.buttons.findIndex(x=>x&&x.value>0.5);if(i>=0){S.bind.btn[CT.cap.k]=i;CT.cap=null;save();$('ctrlMsg').textContent='Assigned '+(BTN_NAMES[i]||'Button '+i)+'.';renderCtrl();}return;}
+    let best=-1,bd=0.6,sign=1;p.axes.forEach((v,i)=>{const d=axisRaw(p.axes,i)-CT.cap.base[i];if(Math.abs(d)>bd){bd=Math.abs(d);best=i;sign=Math.sign(d);}});
+    if(best>=0){S.bind[CT.cap.k]={t:'a',i:best,inv:sign<0};if(CT.cap.k==='thr'&&S.layout==='trigger')S.layout='stick';CT.cap=null;save();$('ctrlMsg').textContent='Assigned axis '+best+(sign<0?' (inverted)':'')+'.';renderCtrl();return;}
+    if(CT.cap.k==='thr'){const i=p.buttons.findIndex((x,k)=>x&&x.value-(CT.cap.bbase[k]||0)>0.6);if(i>=0){S.bind.thr={t:'b',i,inv:false};S.layout='trigger';CT.cap=null;save();$('ctrlMsg').textContent='Throttle on '+(BTN_NAMES[i]||'Button '+i)+' (trigger style).';renderCtrl();}}
+    if(CT.cap&&CT.cap.t>8){CT.cap=null;$('ctrlMsg').textContent='Timed out.';renderCtrl();}
+    return;}
+  let dir=0;if(bv(12)>.5)dir=-1;else if(bv(13)>.5)dir=1;let side=0;if(bv(14)>.5)side=-1;else if(bv(15)>.5)side=1;const code=dir*10+side;
+  if(code){if(CT.nav.dir!==code){CT.nav={dir:code,t:0.35};ctrlNav(dir,side);}else{CT.nav.t-=dt;if(CT.nav.t<=0){CT.nav.t=0.11;ctrlNav(dir,side);}}}else CT.nav.dir=0;
+  if(pressed(0))ctrlActivate();if(pressed(1)&&!CT.calStep)closeCtrl();
+}
+function ctrlNav(dir,side){const n=ctrlRowsDef().length;if(dir){CT.focus=(CT.focus+dir+n)%n;renderCtrl();}else if(side)ctrlChange(side);}
+function ctrlKey(k){if(CT.cap)return;if(k==='arrowup')ctrlNav(-1,0);else if(k==='arrowdown')ctrlNav(1,0);else if(k==='arrowleft')ctrlNav(0,-1);else if(k==='arrowright')ctrlNav(0,1);else if(k==='enter'||k===' ')ctrlActivate();else if(k==='escape'){CT.calStep=0;closeCtrl();}}
 
 // ---------------- updater (asks before updating) ----------------
 function cmpVer(a,b){const x=String(a).split('.').map(Number),y=String(b).split('.').map(Number);for(let i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return (x[i]||0)>(y[i]||0)?1:-1;}return 0;}
@@ -1435,7 +1544,7 @@ function startGame(){if(started)return;started=true;$('start').style.display='no
 $('goBtn').onclick=startGame;
 $('start').addEventListener('click',e=>{if(e.target===$('start'))startGame();});
 addEventListener('pointerdown',()=>initAudio());
-let last=performance.now(),acc=0;
+let last=performance.now(),acc=0,rewinding=false,trigT=0;
 function frame(now){
   requestAnimationFrame(frame);
   const dt=Math.min(0.1,(now-last)/1000);last=now;
@@ -1445,7 +1554,14 @@ function frame(now){
   worldT+=wdt;
   dynCols.length=0;updCranes(worldT);if(updTrain)updTrain(worldT);updTraffic(worldT,wdt);updFans(worldT);updSteam(worldT);if(updParkRides)updParkRides(worldT,wdt);
   for(const m of tokens)if(m.visible)m.rotation.y=worldT*2;
-  if(live){
+  if(live&&rewindHeld&&RB.buf.length>2){
+    pollKeyboard(dt);
+    const n=Math.max(1,Math.round(dt*45));for(let k=0;k<n&&RB.buf.length>2;k++)RB.buf.pop();
+    const f=RB.buf[RB.buf.length-1],g=RB.buf[RB.buf.length-2];D.pos.set(f[0],f[1],f[2]);D.prev.copy(D.pos);D.q.set(f[3],f[4],f[5],f[6]);D.motor=f[7];
+    D.vel.set((f[0]-g[0])*30,(f[1]-g[1])*30,(f[2]-g[2])*30);D.w.set(0,0,0);if(D.crashed){D.crashed=false;$('banner').textContent='';}syncHeading();D.grace=0.6;rewinding=true;
+    staticLvl=Math.max(staticLvl,0.25);
+  }else if(live){
+    if(rewinding){rewinding=false;SAFE.buf.length=0;}
     pollKeyboard(dt);pollTouch();updWind();
     acc+=dt;while(acc>=STEP){physics(STEP);acc-=STEP;}
     tokenStep();recordReplay(dt);
@@ -1457,6 +1573,9 @@ function frame(now){
   beacon.visible=!!tg&&!PH.on&&!RB.on;if(tg)beacon.position.set(tg.x,tg.y+3.5+40,tg.z);
   if(RB.on){updReplay(dt);ghost.visible=false;}else if(PH.on)updPhoto(dt);else{updCamera(dt);updGhost();}
   if(camera.fov!==S.fov){camera.fov=S.fov;camera.updateProjectionMatrix();}
+  // trigger rumble: RT hums with motor load, LT pulses while turtling
+  trigT+=dt;if(trigT>0.12){trigT=0;if(S.trigRumble&&S.rumble&&started){const p=getPad(),a=p&&p.vibrationActuator;if(a&&a.playEffect&&(!a.effects||a.effects.includes('trigger-rumble'))){const r=live&&!D.crashed&&S.bind.thr.t==='b'?Math.min(1,D.motor*0.35+washF*0.4):0,l=turtleHeld&&D.crashed?0.6:0;if(r>0.02||l>0)a.playEffect('trigger-rumble',{duration:150,startDelay:0,leftTrigger:l,rightTrigger:r,strongMagnitude:0,weakMagnitude:0}).catch(()=>{});}}}
+  $('banner').style.display=rewinding?'block':'';if(rewinding)$('banner').textContent='◀◀ REWIND';else if($('banner').textContent==='◀◀ REWIND')$('banner').textContent='';
   updHeadlight();updOSD();updFx(dt);updAudio();
   renderer.render(scene,camera);
 }

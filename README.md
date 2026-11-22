@@ -54,6 +54,17 @@ Switch maps in **Settings → Map**.
 | ![Tunnel](screenshots/08-riverside-tunnel-fpv.png) | ![Garage](screenshots/09-parking-garage-race-fpv.png) |
 | ![Combo](screenshots/10-trick-combo-stunt-park.png) | ![Settings](screenshots/11-settings-menu.png) |
 
+## Controls & feel
+
+- **Rates:** Betaflight-style RC rate, super rate and expo for roll, pitch and yaw, with a live curve preview in Settings.
+- **Throttle:** mid and expo settings, plus three styles (trigger, centre = hover, or full-range stick for RC radios).
+- **Flight modes:** Angle (self-level), **Horizon** (levels at centre stick, flips at full stick) and Acro. Optional **altitude hold** in Angle and Horizon.
+- **Controller setup:** remap every axis and button, set a deadzone for each stick, and calibrate (for drifting sticks or a USB RC radio). Open it from Settings → 🎮 Controller setup.
+- **Turtle mode:** crashed upside down? Hold **LT** (or G) to flip back over and keep flying.
+- **Rewind:** hold **B** (or Backspace) to rewind through the last 30 seconds.
+- **Feel:** the motors spool with a little lag and the drone wobbles in its own prop wash. Xbox impulse triggers rumble with motor load.
+- **Racing line:** a faint line traces your best lap on each track.
+
 ## Xbox controller
 
 Plug it in by USB or pair it over Bluetooth, then press any button.
@@ -64,12 +75,13 @@ Plug it in by USB or pair it over Bluetooth, then press any button.
 | Left stick ↔ | Yaw |
 | Right stick | Pitch / roll |
 | A | Start / respawn after a crash |
-| B | FPV ⇄ chase camera |
-| Y | Acro ⇄ Angle mode (flips need Acro) |
+| B | Tap: FPV ⇄ chase camera · Hold: rewind |
+| Y | Flight mode: Angle → Horizon → Acro |
 | X | Restart lap / new courier job |
 | LB / RB | Camera uptilt − / + |
 | L3 (click left stick) | Replay last 30 seconds |
 | R3 (click right stick) | Photo mode |
+| LT (hold, after a crash) | Turtle flip |
 | View | Reset drone |
 | Menu | Settings / pause (navigate with the D-pad) |
 

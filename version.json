@@ -1,4 +1,4 @@
 {
-  "version": "0.5.0",
-  "notes": "Map feel update: soft obstacles (light poles, cables, AC units, solar panels, trees, scaffolding poles) can be clipped without crashing; real ramps and a stair street; highway on-ramp; overhanging towers; rooftop-gap jumps; steam vents and wet streets; and crashes now respawn you at your last safe spot (or last gate in races) with a hover assist."
+  "version": "0.6.0",
+  "notes": "Controls update: Betaflight-style rates per axis with a live curve, throttle mid/expo, Horizon mode, altitude hold, full controller remapping and calibration (RC radios work), turtle mode (hold LT after a crash), rewind (hold B), Xbox trigger rumble, heavier motor feel with prop-wash wobble, and a racing line drawn from your best lap."
 }
