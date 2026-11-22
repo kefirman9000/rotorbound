@@ -1,4 +1,4 @@
 {
-  "version": "0.4.0",
-  "notes": "New map: Neon Canyons, a dense 380 m vertical city with golden-hour shadows, a neon crossroads, a scaffolding tower with a crane, a rooftop chain, an alley grid with shafts and fire escapes, a broken elevated highway, skybridges and a canal with two bridges. 3 new tracks. Pick the map in Settings."
+  "version": "0.4.1",
+  "notes": "Cleaner skylines: removed the ad billboards, blade signs and hanging signs from both maps. Neon building edges and landmark signs stay."
 }
