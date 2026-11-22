@@ -19,7 +19,7 @@ jobs:
           GITHUB_REF_NAME: ${{ steps.v.outputs.tag }}
         run: |
           mkdir -p dist/Rotorbound
-          cp -r index.html lib Rotorbound.bat launcher.ps1 version.json README.md dist/Rotorbound/
+          cp -r index.html lib img Rotorbound.bat launcher.ps1 version.json README.md dist/Rotorbound/
           cd dist && zip -r "Rotorbound-${GITHUB_REF_NAME}-windows.zip" Rotorbound
       - name: Publish release
         uses: softprops/action-gh-release@v2
