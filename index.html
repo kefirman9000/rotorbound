@@ -121,7 +121,7 @@
 <script>
 (function(){
 'use strict';
-const VERSION='0.4.0';
+const VERSION='0.4.1';
 const REPO='kefirman9000/rotorbound';
 const $=id=>document.getElementById(id);
 if(!window.THREE){document.body.innerHTML='<div style="padding:40px;font-size:20px">Could not load the 3D engine (lib/three.min.js is missing). Re-download Rotorbound from GitHub.</div>';return;}
@@ -220,9 +220,7 @@ function building(x,z,w,d,h,y0=0,opt={}){
   const ac=Math.floor(rnd()*4);for(let k=0;k<ac;k++){b.clear=false;box(x+(rnd()-.5)*w*.6,top,z+(rnd()-.5)*d*.6,1.6+rnd()*2.5,1+rnd()*1.5,1.6+rnd()*2.5,propMat);}
   if(top>45&&rnd()<0.6){b.clear=false;const ax=x+(rnd()-.5)*w*.3,az=z+(rnd()-.5)*d*.3,ah=6+rnd()*14;box(ax,top,az,0.4,ah,0.4,propMat);box(ax,top+ah,az,0.6,0.6,0.6,basic(0xff3b3b),false);}
   if(top<45&&rnd()<0.3){b.clear=false;const tx=x+(rnd()-.5)*w*.4,tz=z+(rnd()-.5)*d*.4;mesh(new THREE.CylinderGeometry(1.6,1.6,3.2,12),trunkMat,tx,top+3.8,tz);mesh(new THREE.ConeGeometry(1.8,1,12),trunkMat,tx,top+5.9,tz);for(const[ox,oz]of[[-1,-1],[1,-1],[-1,1],[1,1]])box(tx+ox*1.1,top,tz+oz*1.1,0.2,2.2,0.2,darkMetal);collider(tx-1.6,top,tz-1.6,tx+1.6,top+6.4,tz+1.6);}
-  if(top>12&&top<45&&rnd()<0.22){b.clear=false;b.bill=true;const alongX=w>=d,bw=Math.min(12,(alongX?w:d)*0.8),bh=5;const by=top+3+bh/2;
-    if(alongX){box(x-bw/3,top,z,0.3,3,0.3,darkMetal);box(x+bw/3,top,z,0.3,3,0.3,darkMetal);billboard(x,by,z+0.05,bw,bh,0,Math.floor(rnd()*99));}
-    else{box(x,top,z-bw/3,0.3,3,0.3,darkMetal);box(x,top,z+bw/3,0.3,3,0.3,darkMetal);billboard(x+0.05,by,z,bw,bh,Math.PI/2,Math.floor(rnd()*99));}}
+  if(top>12&&top<45&&rnd()<0.22){b.clear=false;b.bill=true;rnd();}
   buildings.push(b);return b;
 }
 const trunkGeo=new THREE.CylinderGeometry(0.25,0.35,3,6),crownGeo=new THREE.SphereGeometry(2.4,8,6);
@@ -418,8 +416,8 @@ function buildCanyons(){
       building(-38,-43,24,22,92,0,{plain:true});neonEdges(-38,-43,24,22,0,92,NEON[0]);
       building(-38,-43,17,15,32,92,{plain:true});neonEdges(-38,-43,17,15,92,32,NEON[2]);
       const t=building(-38,-43,10,9,16,124,{plain:true});neonEdges(-38,-43,10,9,124,16,NEON[1]);topper(t,'crown',NEON[1]);
-      billboard(-25.7,30,-43,16,8,Math.PI/2,0);billboard(-25.7,62,-43,14,7,Math.PI/2,2);billboard(-38,24,-31.7,16,8,0,5);billboard(-38,52,-31.7,14,7,0,7);
-      blade(-26,10,-36,'x',1,12);blade(-26,10,-50,'x',1,12);blade(-45,12,-32,'z',1,10);
+      
+      
       MAPDEF.neonA={x:-38,z:-43};
     }
     else if(zn==='neonB'){
@@ -427,15 +425,15 @@ function buildCanyons(){
       building(38,18,24,22,78,0,{plain:true});neonEdges(38,18,24,22,0,78,NEON[1]);
       building(38,18,16,15,30,78,{plain:true});neonEdges(38,18,16,15,78,30,NEON[2]);
       const t=building(38,18,9,8,14,108,{plain:true});neonEdges(38,18,9,8,108,14,NEON[0]);topper(t,'spire',NEON[0]);
-      billboard(25.7,28,18,16,8,-Math.PI/2,1);billboard(25.7,56,18,14,7,-Math.PI/2,3);billboard(38,22,6.7,16,8,Math.PI,4);billboard(38,48,6.7,14,7,Math.PI,6);
-      blade(26,10,12,'x',-1,12);blade(26,10,25,'x',-1,12);blade(45,12,7,'z',-1,10);
+      
+      
       MAPDEF.neonB={x:38,z:18};
     }
     else if(zn==='crossMid'){
       if(i===3){building(27,-43,24,36,70,0,{plain:true});neonEdges(27,-43,24,36,0,70,NEON[3]);building(52.5,-43,17,36,45);
-        billboard(14.7,22,-36,16,8,-Math.PI/2,1);billboard(14.7,44,-50,14,7,-Math.PI/2,6);billboard(27,30,-24.7,18,9,0,0);blade(15,8,-30,'x',-1,11);blade(15,8,-56,'x',-1,11);}
+        }
       else{building(-27,18.5,24,27,65,0,{plain:true});neonEdges(-27,18.5,24,27,0,65,NEON[4]);building(-52.5,18.5,17,27,50);
-        billboard(-14.7,24,12,16,8,Math.PI/2,3);billboard(-14.7,46,26,14,7,Math.PI/2,5);billboard(-27,30,4.7,18,9,Math.PI,2);blade(-15,8,8,'x',1,11);blade(-15,8,29,'x',1,11);}
+        }
     }
     else if(zn==='plaza'){
       box(cx,0.25,cz,W,0.02,Dd,grassMat,false);
@@ -458,10 +456,6 @@ function buildCanyons(){
   openBridge(-26,15,-43,46,NEON[1]);
   openBridge(-15,26,20,58,NEON[0]);
   glassBridgeZ(-32.5,-32,5,30);
-  // hanging signs over the crossroads
-  const hang=(x,y,z,alongX,ad)=>{const w=14,h=6;if(alongX){box(x,y,z,w,h,0.5,darkMetal);billboard(x,y+h/2,z+0.3,w-0.4,h-0.4,0,ad);billboard(x,y+h/2,z-0.3,w-0.4,h-0.4,Math.PI,ad+1);}else{box(x,y,z,0.5,h,w,darkMetal);billboard(x+0.3,y+h/2,z,w-0.4,h-0.4,Math.PI/2,ad);billboard(x-0.3,y+h/2,z,w-0.4,h-0.4,-Math.PI/2,ad+1);}
-    for(const o of[-1,1]){const cx2=alongX?x+o*w*0.4:x,cz2=alongX?z:z+o*w*0.4;box(cx2,y+h,cz2,0.06,14,0.06,darkMetal,false);}};
-  hang(0,18,-30,true,0);hang(0,26,15,true,2);hang(-35,20,-10,false,4);hang(35,14,-10,false,6);
 
   // elevated highway along z=95 with a broken middle section
   {const deckM=lam(0x5d6067),HY=20.8;
@@ -471,7 +465,7 @@ function buildCanyons(){
    for(let x=-186;x<190;x+=22){if(XL.some(([c,w])=>w&&Math.abs(x-c)<w/2+3)||(x>-20&&x<25))continue;for(const z of[90,100])box(x,0,z,1.6,HY,1.6,concrete);}
    box(-14.5,HY-0.6,93,3,1,5,concrete);box(19.5,HY-0.4,97,3,0.8,6,concrete);for(let k=0;k<5;k++){box(-13+k*0.1,HY,90+k*2.5,0.08,0.08,1.2,darkMetal,false);}
    box(3,0,95,10,1.2,8,concrete);box(-2,1.2,93,4,0.8,3,concrete);
-   billboard(-20,HY+3.2,95,8,2.4,Math.PI/2,6);billboard(25,HY+3.2,95,8,2.4,-Math.PI/2,6);
+   
    gapZones.push({c:new V3(2.5,26,95),n:new V3(1,0,0),name:'HIGHWAY JUMP',pts:260,test:p=>Math.abs(p.z-95)<7&&p.y>18&&p.y<34});
    for(const x of[-100,100])gapZones.push({c:new V3(x,8,95),n:new V3(1,0,0),name:'UNDERPASS',pts:120,test:p=>Math.abs(p.z-95)<7&&p.y<HY});
    for(let k=0;k<16;k++){const seg=k<8?[-195,-20]:[25,195],dir=k%2?1:-1;addCar({axis:'x',line:95,dir,lane:dir*3.5,p:seg[0]+rnd()*(seg[1]-seg[0]),v:14+rnd()*8,min:seg[0],max:seg[1],y0:HY+1.2,big:rnd()<0.2});}
@@ -585,7 +579,7 @@ for(let i=0;i<N;i++)for(let j=0;j<N;j++){
   box(230,0,0,8,0.04,400,lam(0x2a2b2e),false);
   const tl=basic(0xfff4d0);for(let z=-195;z<=195;z+=10)box(230,6.85,z,1.6,0.12,0.6,tl,false);
   for(const z of[-200,200]){box(225.5,0,z,1.2,9,1.2,concrete);box(234.5,0,z,1.2,9,1.2,concrete);box(230,7.6,z,10.2,1.4,1.2,concrete);}
-  billboard(230,9.6,-200.7,9,2.2,Math.PI,6);billboard(230,9.6,200.7,9,2.2,0,6);
+  
 }
 
 // elevated train loop on the ±150 roads
@@ -654,7 +648,7 @@ function ringObstacle(x,y,z,nx,ny,nz,r,col,name,pts){
     box(x,y-0.6,z,s*1.5,1,s*1.5,grassMat);collider(x-s*0.7,y-s*1.2,z-s*0.7,x+s*0.7,y-0.6,z+s*0.7);
     tree(x+s*0.3,z-s*0.2,y+0.4);if(s>6)tree(x-s*0.35,z+s*0.3,y+0.4);
   }
-  billboard(-345,30,-124,30,10,0,7);
+  
   const sg=new THREE.Mesh(new THREE.PlaneGeometry(40,8),basic(0xffffff,{map:canvasTex(512,100,(g)=>{g.fillStyle='#0b1020';g.fillRect(0,0,512,100);g.fillStyle='#39ff88';g.font='bold 70px Impact, Arial Black';g.textAlign='center';g.textBaseline='middle';g.fillText('STUNT PARK',256,52);}),side:THREE.DoubleSide}));sg.position.set(-252,16,0);sg.rotation.y=Math.PI/2;scene.add(sg);
 }
 
@@ -674,7 +668,7 @@ const STAD={x:0,z:330};
   const lightPanel=basic(0xbfc4cc);glowMats.push(lightPanel);
   for(const ox of[-1,1])for(const oz of[-1,1]){const x=sx+ox*82,z=sz+oz*64;box(x,0,z,1.2,42,1.2,steel);box(x,42,z,9,4.5,1.2,lightPanel);}
   for(const ox of[-1,1]){const gx=sx+ox*FX;box(gx,0,sz-3.7,0.2,2.4,0.2,seatB);box(gx,0,sz+3.7,0.2,2.4,0.2,seatB);box(gx,2.4,sz,0.2,0.2,7.6,seatB);}
-  billboard(sx,25,sz+62.5,30,9,Math.PI,5);
+  
   gapZones.push({c:new V3(sx,3,sz-FZ-4),n:new V3(0,0,1),name:'STADIUM TUNNEL',pts:250,test:p=>Math.abs(p.x-sx)<5&&p.y<6});
   gapZones.push({c:new V3(sx,1.2,sz),n:new V3(1,0,0),name:'MIDFIELD SKIM',pts:120,test:p=>p.y<1.5&&Math.abs(p.z-sz)<FZ});
 }
