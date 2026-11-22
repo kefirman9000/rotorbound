@@ -51,6 +51,29 @@
   .chip{display:inline-block;min-width:22px;padding:2px 5px;margin:2px;border-radius:5px;background:#1d2a3a;font-family:Consolas,monospace;font-size:12px;text-align:center}
   .chip.on{background:#39ff88;color:#04150b}
   #ctrlLive{font-family:Consolas,monospace;font-size:12px;margin-bottom:8px}
+  #start{align-items:stretch;justify-content:stretch;background:linear-gradient(90deg,rgba(5,10,18,.94) 0,rgba(5,10,18,.8) 40%,rgba(5,10,18,.35) 100%)}
+  #title{display:flex;gap:4vw;width:100%;padding:5vh 5vw 64px;box-sizing:border-box;align-items:center;overflow:auto}
+  #title .tl{flex:0 0 min(400px,40vw)}#title .tr{flex:1;max-width:680px;min-width:0}
+  #title h1{font-size:clamp(34px,5.5vw,64px);font-style:italic;text-shadow:0 0 30px rgba(57,255,136,.25)}
+  #tMenu .row{padding:9px 12px;margin:3px 0;background:rgba(17,26,38,.75);border:1px solid #1d2a3a}
+  #tMenu .row.fly{background:#39ff88;color:#04150b;font-size:22px;font-weight:bold;letter-spacing:3px;justify-content:center;padding:14px;margin-bottom:12px;border:0}
+  #tMenu .row.fly.f{outline:3px solid #fff;animation:pulse 1.4s infinite}
+  #tMenu .row.dim{opacity:.45}
+  .mapcard{border-radius:14px;overflow:hidden;background:#111a26;border:1px solid #2c3e55;box-shadow:0 10px 40px #000}
+  .mapcard img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#0b121b}
+  .mc-body{padding:14px 18px 16px}.mc-name{font-size:24px;font-weight:bold;letter-spacing:1px}.mc-desc{color:#8fa6c0;margin:4px 0 10px;font-size:14px}
+  .mc-stats{display:flex;flex-wrap:wrap;gap:8px}.mc-stats span{background:#1d2a3a;border-radius:6px;padding:4px 9px;font-family:Consolas,monospace;font-size:12px}
+  #tStrip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+  #tStrip div{border-radius:7px;overflow:hidden;border:2px solid transparent;cursor:pointer;opacity:.6;position:relative}
+  #tStrip div.sel{border-color:#39ff88;opacity:1}#tStrip div.cur::after{content:'●';position:absolute;top:1px;right:4px;color:#39ff88;font-size:10px}
+  #tStrip img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+  #tHint{position:absolute;left:0;right:0;bottom:0;padding:10px 5vw;background:rgba(0,0,0,.45);color:#8fa6c0;font-size:13px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  #tHint b{color:#cfe3f7}
+  .tabs{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap;align-items:center}
+  .tab{padding:7px 13px;border-radius:8px;background:#1d2a3a;color:#8fa6c0;font-size:12px;letter-spacing:1px;cursor:pointer;font-weight:bold}
+  .tab.on{background:#3fc8ff;color:#04121c}.tabs .lbrb{color:#55677d;font-size:11px;font-family:Consolas,monospace}
+  #menu .panel{width:min(620px,92vw);height:min(640px,86vh);display:flex;flex-direction:column}#rows{flex:1;overflow:auto}
+  @media (max-width:820px){#title{flex-direction:column;align-items:stretch}#title .tl{flex:none}#tStrip{grid-template-columns:repeat(4,1fr)}}
   #upd{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:#132235;border:1px solid #3fc8ff;border-radius:10px;padding:12px 16px;z-index:20;display:none;max-width:90vw;text-align:center}
   #upd button{margin:8px 6px 0;padding:6px 14px;border-radius:6px;border:0;font-weight:bold;cursor:pointer}
 </style>
@@ -75,11 +98,21 @@
 <div id="upd"></div>
 
 <div class="overlay" id="start">
-  <div class="panel">
-    <h1>ROTORBOUND</h1>
-    <div class="sub">FPV drone game · races · courier jobs · stunt park · day &amp; night · <span id="verS"></span></div>
-    <div class="go" id="goBtn">▶ Press A / Enter / Tap to fly</div>
-    <div class="sub" style="margin:-6px 0 10px">Choose an activity, track and time of day in Settings (☰ Menu / Esc). Tricks score in <b>Free flight &amp; tricks</b>, and combos pay double in the Stunt Park west of the city. 30 hidden ◆ tokens are scattered around the map.</div>
+  <div id="title">
+    <div class="tl">
+      <h1>ROTORBOUND</h1>
+      <div class="sub" style="margin-bottom:14px">FPV drone game · <span id="verS"></span> · <span id="tCash"></span></div>
+      <div id="tMenu"></div>
+    </div>
+    <div class="tr">
+      <div class="mapcard"><img id="tImg" alt=""><div class="mc-body"><div class="mc-name" id="tName"></div><div class="mc-desc" id="tDesc"></div><div class="mc-stats" id="tStats"></div></div></div>
+      <div id="tStrip"></div>
+    </div>
+  </div>
+  <div id="tHint"><span><b>↑↓</b> move · <b>◀ ▶</b> change · <b>A / Enter</b> select · <b>☰ / Esc</b> settings</span><span id="padState">Controller: not detected</span></div>
+</div>
+
+<div class="overlay" id="help" style="display:none"><div class="panel"><h3 style="font-size:20px;margin-top:0">🎮 CONTROLS &amp; KEYS</h3>
     <div class="cols">
       <div>
         <h3>🎮 XBOX CONTROLLER</h3>
@@ -119,19 +152,19 @@
         </table>
       </div>
     </div>
-    <div id="padState">Controller: not detected. Plug in or pair your Xbox controller and press any button.</div>
-  </div>
-</div>
+    <div class="sub" style="margin:12px 0 0;font-size:13px">Tricks score in <b>Free flight &amp; tricks</b>; combos pay double in Rotor City's Stunt Park. Find every ◆ token on a map to open its secret vault. Remap buttons in Settings → Flying → Controller setup.</div>
+    <div class="go" id="helpClose" style="animation:none;font-size:15px;padding:8px 20px;margin:12px 0 0">✔ Got it (A / Esc)</div>
+</div></div>
 
 <div class="overlay" id="ctrl" style="display:none"><div class="panel" style="min-width:min(620px,92vw)"><h3 style="font-size:20px;margin-top:0">🎮 CONTROLLER SETUP</h3><div id="ctrlLive"></div><div id="ctrlRows"></div><div id="ctrlMsg" class="sub" style="margin:10px 0 0;font-size:13px;color:#ffd23f"></div><div class="sub" style="margin:6px 0 0;font-size:12px">D-pad / arrows to move · A / Enter to select · ◀ ▶ to change · B / Esc to close</div></div></div>
-<div class="overlay" id="menu" style="display:none"><div class="panel" style="min-width:min(540px,90vw)"><h3 style="font-size:20px;margin-top:0">⚙ SETTINGS</h3><div id="rows"></div><div class="sub" style="margin:10px 0 0;font-size:12px">D-pad / arrows to move · ◀ ▶ to change · A / Enter to select · B / Esc to close</div></div></div>
+<div class="overlay" id="menu" style="display:none"><div class="panel" style="min-width:min(540px,90vw)"><h3 style="font-size:20px;margin-top:0">⚙ SETTINGS</h3><div class="tabs" id="menuTabs"></div><div id="rows"></div><div class="sub" style="margin:10px 0 0;font-size:12px">↑↓ move · ◀ ▶ change · LB / RB or Q / E switch tab · A / Enter select · B / Esc close</div></div></div>
 
 <script src="lib/three.min.js"></script>
 <script>if(!window.THREE)document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"><\/script>')</script>
 <script>
 (function(){
 'use strict';
-const VERSION='0.7.0';
+const VERSION='0.7.1';
 const REPO='kefirman9000/rotorbound';
 const $=id=>document.getElementById(id);
 if(!window.THREE){document.body.innerHTML='<div style="padding:40px;font-size:20px">Could not load the 3D engine (lib/three.min.js is missing). Re-download Rotorbound from GitHub.</div>';return;}
@@ -1548,7 +1581,7 @@ function axisN(ax,i){return dzv(axisRaw(ax,i),i<2?S.dzL:S.dzR);}
 let gpIndex=null,prevBtn=[],gpName='';
 addEventListener('gamepadconnected',e=>{gpIndex=e.gamepad.index;gpName=e.gamepad.id;toast('🎮 Controller connected');updPad();});
 addEventListener('gamepaddisconnected',e=>{if(gpIndex===e.gamepad.index){gpIndex=null;toast('Controller disconnected');updPad();}});
-function updPad(){$('padState').innerHTML=gpIndex!==null?'Controller: <b style="color:#39ff88">connected</b> · '+(gpName.replace(/\(.*?\)/g,'').trim()||'gamepad'):'Controller: not detected. Plug in or pair your Xbox controller and press any button.';}
+function updPad(){$('padState').innerHTML=gpIndex!==null?'🎮 <b style="color:#39ff88">'+(gpName.replace(/\(.*?\)/g,'').trim()||'Controller')+'</b> connected':'🎮 No controller · plug in or pair one and press any button';}
 function getPad(){const pads=navigator.getGamepads?navigator.getGamepads():[];if(gpIndex!==null&&pads[gpIndex])return pads[gpIndex];for(const p of pads)if(p&&p.connected){gpIndex=p.index;gpName=p.id;updPad();return p;}return null;}
 function rumble(strong,weak,ms){if(!S.rumble)return;const p=getPad();const a=p&&p.vibrationActuator;if(a&&a.playEffect)a.playEffect('dual-rumble',{duration:ms,strongMagnitude:strong,weakMagnitude:weak}).catch(()=>{});}
 const hoverThr=()=>1/S.thrustRatio;
@@ -1567,9 +1600,17 @@ function pollPad(dt){
     const code=dir*10+side;
     if(code!==0){if(navHold.dir!==code){navHold={dir:code,t:0.35};menuNav(dir,side);}else{navHold.t-=dt;if(navHold.t<=0){navHold.t=0.11;menuNav(dir,side);}}}else navHold.dir=0;
     if(pressed(0))menuActivate();
+    if(pressed(4))setTab(mTab-1);if(pressed(5))setTab(mTab+1);
     if(pressed(1)||pressed(9))closeMenu();
+  }else if(helpOpen){
+    if(pressed(0)||pressed(1)||pressed(9))closeHelp();
   }else if(!started){
-    if(b.some((x,i)=>i<12&&pressed(i)))startGame();
+    let dir=0;if(bv(12)>.5||ax[1]<-.6)dir=-1;else if(bv(13)>.5||ax[1]>.6)dir=1;
+    let side=0;if(bv(14)>.5||ax[0]<-.6)side=-1;else if(bv(15)>.5||ax[0]>.6)side=1;
+    const code=dir*10+side;
+    if(code!==0){if(navHold.dir!==code){navHold={dir:code,t:0.35};tNav(dir,side);}else{navHold.t-=dt;if(navHold.t<=0){navHold.t=0.11;tNav(dir,side);}}}else navHold.dir=0;
+    if(pressed(0))tActivate();if(pressed(9))openMenu();
+    if(pressed(4)||pressed(5))tChange(TROWS[1],pressed(4)?-1:1);
   }else if(PH.on){
     if(Math.abs(pad.lx)+Math.abs(pad.ly)+Math.abs(pad.rx)+Math.abs(pad.ry)+pad.lt+pad.rt>0.05)source='controller';
     if(pressed(0))takePhoto();if(pressed(1)||pressed(11)||pressed(9))exitPhoto();if(pressed(4))cycleTod(-1);if(pressed(5))cycleTod(1);
@@ -1603,10 +1644,11 @@ function pollPad(dt){
 }
 addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
-  if(['arrowup','arrowdown','arrowleft','arrowright',' ','backspace'].includes(k))e.preventDefault();
+  if(['arrowup','arrowdown','arrowleft','arrowright',' ','backspace','tab'].includes(k))e.preventDefault();
   if(CT.open){ctrlKey(k);return;}
-  if(menuOpen){if(k==='arrowup'||k==='w')menuNav(-1,0);else if(k==='arrowdown'||k==='s')menuNav(1,0);else if(k==='arrowleft'||k==='a')menuNav(0,-1);else if(k==='arrowright'||k==='d')menuNav(0,1);else if(k==='enter'||k===' ')menuActivate();else if(k==='escape'||k==='p')closeMenu();return;}
-  if(!started){if(k==='enter'||k===' ')startGame();return;}
+  if(menuOpen){if(k==='arrowup'||k==='w')menuNav(-1,0);else if(k==='arrowdown'||k==='s')menuNav(1,0);else if(k==='arrowleft'||k==='a')menuNav(0,-1);else if(k==='arrowright'||k==='d')menuNav(0,1);else if(k==='enter'||k===' ')menuActivate();else if(k==='q'||(k==='tab'&&e.shiftKey))setTab(mTab-1);else if(k==='e'||k==='tab')setTab(mTab+1);else if(k==='escape'||k==='p')closeMenu();return;}
+  if(helpOpen){if(k==='escape'||k==='enter'||k===' ')closeHelp();return;}
+  if(!started){if(k==='arrowup'||k==='w')tNav(-1,0);else if(k==='arrowdown'||k==='s')tNav(1,0);else if(k==='arrowleft'||k==='a')tNav(0,-1);else if(k==='arrowright'||k==='d')tNav(0,1);else if(k==='enter'||k===' ')tActivate();else if(k==='escape')openMenu();return;}
   kb.keys.add(k);
   if(e.repeat)return;
   if(PH.on){source='keyboard';if(k==='enter'||k==='p')takePhoto();else if(k==='f'||k==='escape')exitPhoto();else if(k==='['||k==='z')cycleTod(-1);else if(k===']'||k==='x')cycleTod(1);return;}
@@ -1891,6 +1933,7 @@ function updFx(dt){
 const tiltQ=new QT(),shakeQ=new QT(),chasePos=new V3(0,3,6),_hf=new V3(),XAX=new V3(1,0,0);
 let shake=0;
 function updCamera(dt){
+  if(!started&&!window.__rbHold){const sp=MAPDEF.spawn.p,a=performance.now()*0.00005+(MAPDEF.spawn.h||0);drone.visible=false;camera.position.set(sp[0],Math.max(sp[1],groundH(sp[0],sp[2],sp[1]+2))+2.2,sp[2]);_e.set(0.06,a,0,'YXZ');camera.quaternion.setFromEuler(_e);return;}
   const fpv=S.view==='fpv';
   drone.visible=!fpv;
   drone.position.copy(D.pos);drone.quaternion.copy(D.q);
@@ -1974,6 +2017,7 @@ function toast(msg){const t=$('toast');t.textContent=msg;t.style.opacity=1;clear
 let menuOpen=false,focus=1;
 const ROWS=[
   {h:'PLAY'},
+  {a:'resume',l:'▶ Resume'},
   {k:'map',l:'Map',o:[['city','Rotor City'],['canyons','Neon Canyons'],['port','Port Yard'],['factory','Abandoned Factory'],['valley','Canyon Valley'],['ski','Ski Resort'],['mall','Mall & Airport']]},
   {k:'activity',l:'Activity',o:[['race','Race'],['courier','Courier jobs'],['free','Free flight & tricks']]},
   {k:'track',l:'Track',o:TRACK_IDS.map(id=>[id,TRACKS[id].name])},
@@ -1987,14 +2031,14 @@ const ROWS=[
   {k:'shadows',l:'Sun shadows (all maps except Rotor City)',b:1},
   {k:'respawn',l:'After a crash',o:[['safe','Respawn at last safe spot / gate'],['start','Restart from the start']]},
   {k:'light',l:'Drone headlight',o:[['auto','Auto (dark)'],['on','On'],['off','Off']]},
-  {a:'replay',l:'⏪ Replay last 30 seconds'},{a:'photo',l:'📷 Photo mode'},
+  {a:'replay',l:'⏪ Replay last 30 seconds',game:1},{a:'photo',l:'📷 Photo mode',game:1},
   {h:'FLYING'},
   {k:'mode',l:'Flight mode',o:[['angle','Angle (self-level)'],['horizon','Horizon (level + flips)'],['acro','Acro (flips & rolls)']]},
   {k:'altHold',l:'Altitude hold (Angle/Horizon)',b:1},
   {k:'layout',l:'Throttle style',o:[['trigger','Trigger (RT)'],['hover','Stick · center = hover'],['stick','Stick / RC radio · full range']]},
   {k:'thrMid',l:'Throttle mid',min:0.2,max:0.8,st:0.05,f:v=>v.toFixed(2)},
   {k:'thrExpo',l:'Throttle expo',min:0,max:1,st:0.05,f:v=>v.toFixed(2)},
-  {h:'RATES (Betaflight actual)'},{info:'rates'},{k:'rollRc',l:'Roll RC rate',min:0.2,max:2.55,st:0.05,f:v=>v.toFixed(2)},{k:'rollSr',l:'Roll super rate',min:0,max:0.95,st:0.05,f:v=>v.toFixed(2)},{k:'rollEx',l:'Roll expo',min:0,max:1,st:0.05,f:v=>v.toFixed(2)},{k:'pitchRc',l:'Pitch RC rate',min:0.2,max:2.55,st:0.05,f:v=>v.toFixed(2)},{k:'pitchSr',l:'Pitch super rate',min:0,max:0.95,st:0.05,f:v=>v.toFixed(2)},{k:'pitchEx',l:'Pitch expo',min:0,max:1,st:0.05,f:v=>v.toFixed(2)},{k:'yawRc',l:'Yaw RC rate',min:0.2,max:2.55,st:0.05,f:v=>v.toFixed(2)},{k:'yawSr',l:'Yaw super rate',min:0,max:0.95,st:0.05,f:v=>v.toFixed(2)},{k:'yawEx',l:'Yaw expo',min:0,max:1,st:0.05,f:v=>v.toFixed(2)},
+  {h:'RATES'},{info:'rates'},{k:'rollRc',l:'Roll RC rate',min:0.2,max:2.55,st:0.05,f:v=>v.toFixed(2)},{k:'rollSr',l:'Roll super rate',min:0,max:0.95,st:0.05,f:v=>v.toFixed(2)},{k:'rollEx',l:'Roll expo',min:0,max:1,st:0.05,f:v=>v.toFixed(2)},{k:'pitchRc',l:'Pitch RC rate',min:0.2,max:2.55,st:0.05,f:v=>v.toFixed(2)},{k:'pitchSr',l:'Pitch super rate',min:0,max:0.95,st:0.05,f:v=>v.toFixed(2)},{k:'pitchEx',l:'Pitch expo',min:0,max:1,st:0.05,f:v=>v.toFixed(2)},{k:'yawRc',l:'Yaw RC rate',min:0.2,max:2.55,st:0.05,f:v=>v.toFixed(2)},{k:'yawSr',l:'Yaw super rate',min:0,max:0.95,st:0.05,f:v=>v.toFixed(2)},{k:'yawEx',l:'Yaw expo',min:0,max:1,st:0.05,f:v=>v.toFixed(2)},
   {k:'angleMax',l:'Angle mode max tilt',min:20,max:80,st:5,f:v=>v+'°'},
   {k:'thrustRatio',l:'Power (thrust : weight)',min:2,max:8,st:0.5,f:v=>v.toFixed(1)+':1'},
   {a:'ctrl',l:'🎮 Controller setup, remap & calibrate'},
@@ -2009,15 +2053,20 @@ const ROWS=[
   {k:'trigRumble',l:'Trigger rumble (Xbox)',b:1},
   {k:'sound',l:'Sound',b:1},
   {k:'volume',l:'Volume',min:0,max:1,st:0.05,f:v=>Math.round(v*100)+'%'},
-  {h:''},
-  {a:'resume',l:'▶ Resume'},{a:'reset',l:'↺ Reset drone'},{a:'clearGhost',l:'Clear best lap, ghost & leaderboard for this track'},{a:'defaults',l:'Restore default settings'},{a:'update',l:'⟳ Check for updates'},
+  {h:'SYSTEM'},
+  {a:'help',l:'🎮 Controls & keys'},{a:'title',l:'⌂ Main menu',game:1},{a:'reset',l:'↺ Reset drone',game:1},{a:'clearGhost',l:'Clear best lap, ghost & leaderboard for this track'},{a:'defaults',l:'Restore default settings'},{a:'update',l:'⟳ Check for updates'},
   {a:'sponsor',l:'❤ Support Rotorbound on GitHub Sponsors'}
 ];
-const skip=r=>('h' in r)||('info' in r);
+const skip=r=>('h' in r)||('info' in r)||(r.game&&!started);
+const TABS=ROWS.filter(r=>'h' in r).map(r=>r.h),TABOF=[];{let t=-1;ROWS.forEach((r,i)=>{if('h' in r)t++;TABOF[i]=t;});}
+let mTab=0;
+function tabRows(){return ROWS.map((r,i)=>i).filter(i=>TABOF[i]===mTab&&!skip(ROWS[i]));}
+function setTab(t){mTab=(t+TABS.length)%TABS.length;focus=tabRows()[0];renderMenu();}
 function valText(r){const v=S[r.k];if(r.o){const o=r.o.find(x=>x[0]===v);return o?o[1]:String(v);}if(r.b)return v?'ON':'OFF';return r.f(v);}
 function boardText(){const b=store.get('board.'+S.track,[]);if(!b.length)return '🏁 '+TRACKS[S.track].name+' leaderboard: no laps yet';return '🏁 '+TRACKS[S.track].name+' · top laps on this PC\n'+b.slice(0,5).map((e,i)=>`  ${i+1}. ${fmtT(e.t)}   ${e.d}`).join('\n');}
 function renderMenu(){
-  $('rows').innerHTML=ROWS.map((r,i)=>('h' in r)?`<div class="row hd">${r.h}</div>`:('info' in r)?(r.info==='rates'?`<div class="row info"><canvas id="rateCv" width="460" height="130" style="width:100%;max-width:460px"></canvas></div>`:`<div class="row info">${boardText()}</div>`):r.a?`<div class="row act${i===focus?' f':''}" data-i="${i}">${r.a==='sponsor'?`<a href="https://github.com/sponsors/kefirman9000" target="_blank" rel="noopener">${r.l}</a>`:r.l}</div>`:`<div class="row${i===focus?' f':''}" data-i="${i}"><span>${r.l}</span><span class="v"><span data-d="-1">◀</span>${valText(r)}<span data-d="1">▶</span></span></div>`).join('')+
+  $('menuTabs').innerHTML='<span class="lbrb">LB</span>'+TABS.map((t,k)=>`<div class="tab${k===mTab?' on':''}" data-t="${k}">${t}</div>`).join('')+'<span class="lbrb">RB</span>';
+  $('rows').innerHTML=ROWS.map((r,i)=>(TABOF[i]!==mTab||('h' in r)||(r.game&&!started))?'':('info' in r)?(r.info==='rates'?`<div class="row info"><canvas id="rateCv" width="460" height="130" style="width:100%;max-width:460px"></canvas></div>`:`<div class="row info">${boardText()}</div>`):r.a?`<div class="row act${i===focus?' f':''}" data-i="${i}">${r.a==='resume'&&!started?'◀ Back to main menu':r.a==='sponsor'?`<a href="https://github.com/sponsors/kefirman9000" target="_blank" rel="noopener">${r.l}</a>`:r.l}</div>`:`<div class="row${i===focus?' f':''}" data-i="${i}"><span>${r.l}</span><span class="v"><span data-d="-1">◀</span>${valText(r)}<span data-d="1">▶</span></span></div>`).join('')+
     `<div class="sub" style="text-align:center;margin:8px 0 0;font-size:12px">${MAPDEF.name} · ${MAPDEF.vaults.length?(MAPDEF.vaults[0].open?'🔓 vault open':'🔒 find every ◆ to open the vault')+' · ':''}Rotorbound v${VERSION} · earnings ${fmtCash(cash)} · tokens ${gotTokens.size}/${tokens.length} · trick score ${T.total.toLocaleString()}</div>`;
   const el=$('rows').querySelector('.row.f');if(el)el.scrollIntoView({block:'nearest'});
   drawRates();
@@ -2036,11 +2085,12 @@ function change(r,d){
   if(r.k==='mode'&&S.mode==='angle')syncHeading();
   if(r.k==='layout'){if(S.layout==='trigger'&&S.bind.thr.t!=='b')S.bind.thr={t:'b',i:7,inv:false};if(S.layout!=='trigger'&&S.bind.thr.t==='b')S.bind.thr={t:'a',i:1,inv:true};}
   if(r.k==='racingLine')buildRacingLine();
-  if(r.k==='map'||r.k==='shadows'){if(r.k==='map'&&S.map==='canyons'&&S.tod==='day')S.tod='sunset';save();$('menu').innerHTML='<div class="panel">Loading '+(S.map==='canyons'?'Neon Canyons':'Rotor City')+'…</div>';setTimeout(()=>location.reload(),50);return;}
+  if(r.k==='map'||r.k==='shadows'){if(r.k==='map'&&S.map==='canyons'&&S.tod==='day')S.tod='sunset';save();showLoading(S.map);return;}
   if(r.k==='activity'||r.k==='track'){if(r.k==='track'&&S.activity!=='race')S.activity='race';setupActivity();}
   save();renderMenu();
 }
-function menuNav(dir,side){if(dir){do{focus=(focus+dir+ROWS.length)%ROWS.length;}while(skip(ROWS[focus]));renderMenu();}else if(side)change(ROWS[focus],side);}
+function menuNav(dir,side){if(dir){const tr=tabRows();if(!tr.length)return;const k=tr.indexOf(focus);focus=tr[k<0?0:(k+dir+tr.length)%tr.length];renderMenu();}else if(side)change(ROWS[focus],side);}
+$('menuTabs').addEventListener('click',e=>{const t=e.target.closest('.tab');if(t)setTab(+t.dataset.t);});
 function menuActivate(){
   const r=ROWS[focus];if(skip(r))return;
   if(!r.a){change(r,1);return;}
@@ -2052,10 +2102,50 @@ function menuActivate(){
   else if(r.a==='clearGhost'){store.set('best.'+S.track,null);store.set('ghost.'+S.track,null);store.set('board.'+S.track,[]);loadTrackRecords();renderMenu();toast('Cleared records for '+TRACKS[S.track].name);}
   else if(r.a==='defaults'){S=Object.assign({},DEFAULTS);save();setupActivity();renderMenu();toast('Defaults restored');}
   else if(r.a==='update')checkUpdate(true);
+  else if(r.a==='help'){closeMenu();openHelp();}
+  else if(r.a==='title')toTitle();
   else if(r.a==='sponsor'){const a=$('rows').querySelector('a');if(a)a.click();}
 }
-function openMenu(){if(!started)return;if(RB.on)exitReplay();if(PH.on)exitPhoto();menuOpen=true;if(skip(ROWS[focus]))focus=1;$('menu').style.display='flex';renderMenu();}
-function closeMenu(){menuOpen=false;$('menu').style.display='none';}
+function openMenu(){if(RB.on)exitReplay();if(PH.on)exitPhoto();menuOpen=true;if(started)mTab=0;if(TABOF[focus]!==mTab||skip(ROWS[focus]))focus=tabRows()[0];$('menu').style.display='flex';renderMenu();}
+function closeMenu(){menuOpen=false;$('menu').style.display='none';if(!started){tMap=MAP;renderTitle();}}
+
+// ---------------- main menu (title screen) ----------------
+const MAP_INFO={city:{n:'Rotor City',d:'A big sprawling city with a stunt park, a stadium, the Skyfair theme park, a river and an elevated train.',tk:30,tr:6},
+  canyons:{n:'Neon Canyons',d:'A compact, vertical neon city: street canyons, skybridges, rooftops, a subway, a spinner tower and a canal.',tk:30,tr:3},
+  port:{n:'Port Yard',d:'Container canyons, moving gantry cranes and two cargo ships you can fly straight through.',tk:25,tr:2},
+  factory:{n:'Abandoned Factory',d:'A dark hall of catwalks and conveyors, smokestacks, silos and a pitch-black tunnel.',tk:25,tr:2},
+  valley:{n:'Canyon Valley',d:'Real terrain: a river, a waterfall with a cave behind it, a dam spillway, bridges and a rock arch.',tk:28,tr:2},
+  ski:{n:'Ski Resort',d:'A snowy mountain with a chairlift, a gondola, a ski jump, slalom flags and a lodge.',tk:30,tr:2},
+  mall:{n:'Mall & Airport',d:'A three-floor atrium, a food court, an airport terminal, jet bridges and taxiing planes.',tk:26,tr:2}};
+let tMap=MAP,tFocus=0,helpOpen=false;
+const TROWS=[{a:'fly'},{k:'map',l:'Map'},{k:'activity',l:'Mode'},{k:'track',l:'Track'},{k:'weather',l:'Weather'},{k:'tod',l:'Time of day'},{a:'settings',l:'⚙ Settings'},{a:'help',l:'🎮 Controls & keys'}];
+const rowDef=k=>ROWS.find(r=>r.k===k);
+const tHidden=r=>r.k==='track'&&(S.activity!=='race'||tMap!==MAP);
+function tVal(r){if(r.k==='map')return MAP_INFO[tMap].n;const d=rowDef(r.k),o=d.o.find(x=>x[0]===S[r.k]);return o?o[1]:String(S[r.k]);}
+function showLoading(m){$('menu').style.display='flex';$('menu').innerHTML='<div class="panel" style="font-size:20px;padding:30px 40px">Loading '+MAP_INFO[m].n+'…</div>';setTimeout(()=>location.reload(),50);}
+function renderTitle(){
+  const tk=id=>store.get(id==='city'?'tokens':'tokens.'+id,[]).length;
+  $('tMenu').innerHTML=TROWS.map((r,i)=>tHidden(r)?'':r.a==='fly'?`<div class="row fly${i===tFocus?' f':''}" data-i="${i}">▶ ${tMap===MAP?'FLY':'LOAD &amp; FLY'}</div>`:r.a?`<div class="row act${i===tFocus?' f':''}" data-i="${i}">${r.l}</div>`:
+    `<div class="row${i===tFocus?' f':''}" data-i="${i}"><span>${r.l}</span><span class="v"><span data-d="-1">◀</span>${tVal(r)}<span data-d="1">▶</span></span></div>`).join('');
+  const I=MAP_INFO[tMap];$('tImg').src='img/maps/'+tMap+'.jpg';$('tName').textContent=I.n;$('tDesc').textContent=I.d;
+  const got=tk(tMap),tot=tMap===MAP?tokens.length:I.tk,st=[`◆ ${got}/${tot} tokens`,store.get('vault.'+tMap,false)?'🏆 vault found':got>=tot?'🔓 vault open':'🔒 vault locked',`🏁 ${I.tr} tracks`];
+  if(tMap===MAP&&S.activity==='race'&&TRACKS[S.track]){const b=store.get('best.'+S.track,null);st.push('⏱ best '+(b?fmtT(b.t!=null?b.t:b):'—'));}
+  if(tMap!==MAP)st.push('loads when you fly');
+  $('tStats').innerHTML=st.map(x=>`<span>${x}</span>`).join('');
+  $('tStrip').innerHTML=MAP_IDS.map(id=>`<div class="${id===tMap?'sel':''}${id===MAP?' cur':''}" data-m="${id}" title="${MAP_INFO[id].n}"><img src="img/maps/${id}.jpg" alt="${MAP_INFO[id].n}"></div>`).join('');
+  $('tCash').textContent='earnings '+fmtCash(cash);
+}
+function tNav(dir,side){const vis=TROWS.map((r,i)=>i).filter(i=>!tHidden(TROWS[i]));if(dir){const k=vis.indexOf(tFocus);tFocus=vis[k<0?0:(k+dir+vis.length)%vis.length];renderTitle();}else if(side)tChange(TROWS[tFocus],side);}
+function tChange(r,d){if(r.a)return;if(r.k==='map'){const k=MAP_IDS.indexOf(tMap);tMap=MAP_IDS[(k+d+MAP_IDS.length)%MAP_IDS.length];}else change(rowDef(r.k),d);renderTitle();}
+function tActivate(){const r=TROWS[tFocus];if(!r.a){tChange(r,1);return;}
+  if(r.a==='fly'){if(tMap!==MAP){S.map=tMap;save();try{sessionStorage.setItem('rb.fly','1');}catch(e){}showLoading(tMap);}else startGame();}
+  else if(r.a==='settings')openMenu();else if(r.a==='help')openHelp();}
+$('tMenu').addEventListener('click',e=>{const row=e.target.closest('.row');if(!row)return;tFocus=+row.dataset.i;const d=e.target.dataset.d;if(d)tChange(TROWS[tFocus],+d);else tActivate();renderTitle();});
+$('tStrip').addEventListener('click',e=>{const c=e.target.closest('[data-m]');if(!c)return;if(tMap===c.dataset.m){tFocus=0;tActivate();return;}tMap=c.dataset.m;tFocus=1;renderTitle();});
+function openHelp(){helpOpen=true;$('help').style.display='flex';}
+function closeHelp(){helpOpen=false;$('help').style.display='none';}
+$('helpClose').onclick=closeHelp;$('help').addEventListener('click',e=>{if(e.target===$('help'))closeHelp();});
+function toTitle(){closeMenu();if(RB.on)exitReplay();if(PH.on)exitPhoto();started=false;tMap=MAP;tFocus=0;document.body.classList.add('clean');$('start').style.display='flex';renderTitle();}
 
 // ---------------- controller setup / remap / calibration ----------------
 const CT={open:false,focus:0,cap:null,calStep:0,cal:null,nav:{dir:0,t:0}};
@@ -2123,9 +2213,8 @@ function showUpdate(j){
 
 // ---------------- loop ----------------
 let started=false;
-function startGame(){if(started)return;started=true;$('start').style.display='none';initAudio();setupActivity();}
-$('goBtn').onclick=startGame;
-$('start').addEventListener('click',e=>{if(e.target===$('start'))startGame();});
+function startGame(){if(started)return;started=true;closeHelp();document.body.classList.remove('clean');$('start').style.display='none';initAudio();setupActivity();}
+document.body.classList.add('clean');renderTitle();try{if(sessionStorage.getItem('rb.fly')){sessionStorage.removeItem('rb.fly');tFocus=0;renderTitle();toast(MAP_INFO[MAP].n+' loaded · press A / Enter to fly');}}catch(e){}
 addEventListener('pointerdown',()=>initAudio());
 let last=performance.now(),acc=0,rewinding=false,trigT=0;
 function frame(now){

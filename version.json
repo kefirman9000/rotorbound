@@ -1,4 +1,4 @@
 {
-  "version": "0.7.0",
-  "notes": "Map update: five new maps (Port Yard, Abandoned Factory, Canyon Valley, Ski Resort, Mall & Airport); Neon Canyons gets a subway, a spinner tower, a collapsing bridge, a car wash, a water tower climb, rooftop pools and wind turbines; weather (fog, rain with lightning, snow); helicopters and a blimp with bonus orbs; fireworks and searchlights; time-trial segments; secret vaults that open when you find every token; breakable cones, boxes, barrels and glass."
+  "version": "0.7.1",
+  "notes": "New main menu: pick a map from preview cards (with your token and vault progress), mode, track, weather and time of day, then fly; the world pans slowly behind it. Settings are now split into tabs (Play, Flying, Rates, Camera & Sound, System) that you switch with LB / RB or Q / E. Controls & keys has its own screen, and you can return to the main menu from the pause menu."
 }

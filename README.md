@@ -23,7 +23,7 @@ The game opens in its own window and works offline. Each launch checks GitHub fo
 - **Ski Resort:** a snowy mountain with a chairlift, a gondola, a ski jump, slalom flags and a lodge.
 - **Mall & Airport:** a three-floor atrium with escalators, a food court and fountain, an airport terminal with a baggage carousel, jet bridges, parked and taxiing planes, a control tower and a parking deck.
 
-Switch maps in **Settings → Map**, and the weather in **Settings → Weather** (map default, clear, fog, rain with lightning, or snow).
+Pick a map on the **main menu** (or **Settings → Play**), along with the mode, track and weather (map default, clear, fog, rain with lightning, or snow).
 
 ![Neon Canyons](screenshots/20-canyons-crossroads-golden-hour.png)
 
