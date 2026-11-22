@@ -26,6 +26,8 @@ Switch maps in **Settings → Map**.
 - **Courier jobs:** pick up a package on one rooftop and land it on another before par time. Heavier packages make the drone sluggish, and wind gusts get stronger up high.
 - **Free flight & tricks:** flips, rolls, power loops, corkscrews, dives, proximity runs and gaps (rings, fans, under bridges, through the tunnel, the stadium tunnel, the skeleton tower and the Ferris wheel) chain into combos. Combos pay **double in the Stunt Park**.
 - **30 hidden tokens** around the map, worth $50 each.
+- **Forgiving where it should be:** light poles, cables, wires, AC units, solar panels, trees and scaffolding poles are *soft*, so clipping them wobbles you instead of ending the run. Walls, pillars and building faces are still hard. After a crash you respawn at your last safe spot, or at the last gate in a race, with a 2-second hover assist. Prefer a full restart? Change it in Settings.
+- **Flow features:** real ramps and rising roads (the Neon Canyons highway on-ramp, the stair street up to the waterfront terrace, kicker ramps in the Stunt Park), overhanging towers, rooftop-gap jumps, steam vents and wet, reflective streets.
 - **The world:** a skeleton tower under construction with tower cranes swinging their hooks, an elevated train looping the city, traffic, alleys with fire escapes, rooftop billboards and water towers, a riverside tunnel, the Stunt Park (giant rings, spinning fans, a half-pipe, dive towers, floating islands), a stadium, and the Skyfair theme park (Ferris wheel, roller coaster, drop tower).
 - **Time of day:** day, sunset, night or a full cycle, with lit windows, neon, street lamps, car headlights and a drone headlight.
 - **Replay** of your last 30 seconds with 4 camera angles, and a **photo mode** that saves PNGs to your Downloads folder.
@@ -40,6 +42,7 @@ Switch maps in **Settings → Map**.
 | ![Alley](screenshots/23-canyons-alley-fpv.png) | ![Highway](screenshots/24-canyons-highway-break-fpv.png) |
 | ![Waterfront](screenshots/25-canyons-waterfront-bridge.png) | ![Neon night](screenshots/26-canyons-neon-night.png) |
 | ![Skybridge](screenshots/27-canyons-skybridge-fpv.png) | ![Crossroads](screenshots/20-canyons-crossroads-golden-hour.png) |
+| ![Stair street](screenshots/28-canyons-stair-street.png) | ![Highway on-ramp](screenshots/29-canyons-highway-onramp.png) |
 
 ### Rotor City
 

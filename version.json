@@ -1,4 +1,4 @@
 {
-  "version": "0.4.1",
-  "notes": "Cleaner skylines: removed the ad billboards, blade signs and hanging signs from both maps. Neon building edges and landmark signs stay."
+  "version": "0.5.0",
+  "notes": "Map feel update: soft obstacles (light poles, cables, AC units, solar panels, trees, scaffolding poles) can be clipped without crashing; real ramps and a stair street; highway on-ramp; overhanging towers; rooftop-gap jumps; steam vents and wet streets; and crashes now respawn you at your last safe spot (or last gate in races) with a hover assist."
 }
