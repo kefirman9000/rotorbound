@@ -32,6 +32,9 @@ Pick a map on the **main menu** (or **Settings → Play**), along with the mode,
 - **Races:** 6 tracks in Rotor City (City Loop, Parking Garage, Bridge Run, Rooftop Run, Stunt Park Slalom, Skyfair Park) 3 in Neon Canyons (Crossroads Sprint, Canyon Run, Sky Chain) and 2 on each of the five new maps. A ghost of your best lap flies alongside you, and the top 10 laps on your PC are kept for each track.
 - **Courier jobs:** pick up a package on one rooftop and land it on another before par time. Heavier packages make the drone sluggish, and wind gusts get stronger up high.
 - **Free flight & tricks:** flips, rolls, power loops, corkscrews, dives, proximity runs and gaps (rings, fans, under bridges, through the tunnel, the stadium tunnel, the skeleton tower and the Ferris wheel) chain into combos. Combos pay **double in the Stunt Park**.
+- **Garage:** spend your earnings on frames (race, cinewhoop with prop guards, X8 heavy lifter), motors, props and 6S batteries. Each part changes thrust, weight, agility, top speed, toughness, carrying power and battery sag, and the garage shows the before-and-after stats.
+- **Launch pads:** choose where you start on every map (main pad, rooftops, ground spots) from the main menu or Settings → Play.
+- **Sound:** four separately tuned motors that react to your stick inputs, motor pitch that changes with your parts, prop-wash rumble, wind that builds with speed, and echo in tunnels, halls and under roofs.
 - **30 hidden tokens** around each map, worth $50 each. Find them all and a **secret vault** opens somewhere on the map, worth $5,000.
 - **Time-trial segments:** short timed sections on every map (fly through the start, beat your best at the finish).
 - **Things to break:** traffic cones, cardboard boxes, barrels and glass panes scatter or shatter when you hit them, without crashing you.
@@ -74,7 +77,9 @@ Pick a map on the **main menu** (or **Settings → Play**), along with the mode,
 | ![Night](screenshots/04-night-street-traffic-fpv.png) | ![Stunt park](screenshots/05-stunt-park-sunset-chase.png) |
 | ![Stadium](screenshots/06-stadium-dive-fpv.png) | ![Skyfair](screenshots/07-skyfair-night-fpv.png) |
 | ![Tunnel](screenshots/08-riverside-tunnel-fpv.png) | ![Garage](screenshots/09-parking-garage-race-fpv.png) |
-| ![Combo](screenshots/10-trick-combo-stunt-park.png) | ![Settings](screenshots/11-settings-menu.png) |
+| ![Combo](screenshots/10-trick-combo-stunt-park.png) | ![Settings](screenshots/11-settings-menu.png)
+
+![Garage](screenshots/12-garage.png) |
 
 ## Controls & feel
 
@@ -116,9 +121,9 @@ The keyboard and touch controls are listed on the start screen.
 3. ✅ Busy world, stunt park, stadium, theme park, tricks, tokens, replay, photo mode
 4. ✅ Neon Canyons map
 4b. ✅ Five more maps, set pieces, weather, secret vaults, segments and destructibles
-5. Garage (frames, motors, props, batteries) to spend your earnings
+5. ✅ Garage (frames, motors, props, batteries) to spend your earnings
 6. Film gigs + defense nights
-7. Signal range, sound and polish
+7. Signal range and polish (✅ sound)
 8. Online leaderboards (needs a small server)
 
 ## Credits
