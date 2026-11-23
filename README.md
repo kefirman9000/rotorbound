@@ -32,10 +32,11 @@ Pick a map on the **main menu** (or **Settings → Play**), along with the mode,
 - **Races:** 6 tracks in Rotor City (City Loop, Parking Garage, Bridge Run, Rooftop Run, Stunt Park Slalom, Skyfair Park) 3 in Neon Canyons (Crossroads Sprint, Canyon Run, Sky Chain) and 2 on each of the five new maps. A ghost of your best lap flies alongside you, and the top 10 laps on your PC are kept for each track.
 - **Courier jobs:** pick up a package on one rooftop and land it on another before par time. Heavier packages make the drone sluggish, and wind gusts get stronger up high.
 - **Free flight & tricks:** flips, rolls, power loops, corkscrews, dives, proximity runs and gaps (rings, fans, under bridges, through the tunnel, the stadium tunnel, the skeleton tower and the Ferris wheel) chain into combos. Combos pay **double in the Stunt Park**.
-- **Kamikaze war mode:** fly an armed FPV drone into tanks, trucks, radar dishes, fuel depots and jammer trucks. Anti-aircraft guns track you and fire tracers, jammers scramble your video, fuel depots set off chain reactions, and every wave adds more guns. You get 8 drones, plus 2 more for each wave you clear.
+- **Night mode:** street lamps and neon light pools on the ground, car headlight beams, and brighter reflections when it rains.
+- **Kamikaze war mode:** fly an armed FPV drone into tanks, trucks, radar dishes, fuel depots and jammer trucks. Anti-aircraft guns track you and fire tracers, jammers scramble your video, fuel depots set off chain reactions, and every wave adds more guns. You get 8 drones, plus 2 more for each wave you clear. Targets get red boxes on screen and an edge arrow points to the nearest one off screen. Hits throw fireballs, a shockwave and wreckage, and wrecks keep burning.
 - **Landing zones:** glowing orange pads on rooftops, containers, towers and the ground in free flight. Land softly and dead centre for more cash. The pink ◎ bullseye pads on tall towers pay double.
-- **AI racers:** three rival drones on every track (Easy, Medium or Hard), with your position shown on the OSD.
-- **Film gigs:** chase-cam a pro pilot for 45 seconds. You're scored on keeping them centred, at a good distance, with smooth flying.
+- **AI racers:** three rival drones on every track (Easy, Medium or Hard), with your position shown on the OSD. They follow a line that keeps clear of walls. Laps now pay cash, with bonuses for a new best and for finishing on the podium.
+- **Film gigs:** chase-cam a pro pilot, follow a car for a commercial, or film the blimp or news helicopter. You're scored on keeping them centred, at a good distance, with smooth flying.
 - **Track builder:** fly around and drop gates where you want them, save the track, race it, and share it as a code.
 - **Career & stats:** 20 challenges with cash rewards, plus lifetime stats (flight time, distance, crashes, laps, kills and more).
 - **Paint shop:** frame paint, LED colour, prop colour and OSD colour in the garage.
@@ -54,6 +55,12 @@ Pick a map on the **main menu** (or **Settings → Play**), along with the mode,
 - **Replay** of your last 30 seconds with 4 camera angles, and a **photo mode** that saves PNGs to your Downloads folder.
 
 ## Screenshots
+
+### Night and rain (v0.10)
+
+| | |
+|---|---|
+| ![Neon Canyons at night in the rain](screenshots/55-night-rain.png) | ![Rotor City at night](screenshots/56-night-city.png) |
 
 ### War, landings and racing (v0.9)
 
@@ -148,3 +155,20 @@ Built with [three.js](https://threejs.org) (MIT license, included in `lib/`).
 ## ❤ Support
 
 If you enjoy Rotorbound, you can support development through **[GitHub Sponsors](https://github.com/sponsors/kefirman9000)**.
+
+## Code layout
+
+`index.html` holds the page and styles. The game code lives in `js/`, loaded in this order:
+
+| File | What's in it |
+|---|---|
+| `core.js` | settings, garage parts, renderer, materials, world helpers, traffic, lamps |
+| `mapkit.js` | shared map features: terrain, holes, vaults, destructibles, aircraft, weather, fireworks |
+| `maps.js` | Port Yard, Abandoned Factory, Canyon Valley, Ski Resort, Mall & Airport |
+| `canyons.js` | Neon Canyons |
+| `city.js` | Rotor City and the build step (merging, night lights) |
+| `game.js` | collision, tracks and gates, courier jobs, tokens, drone, tricks, input, physics |
+| `systems.js` | replay, photo mode, time of day, audio, video effects, camera, OSD |
+| `ui.js` | settings menu, garage, main menu, controller setup, updater |
+| `modes.js` | landing zones, war, AI racers, film gigs, track builder, career, battery, signal |
+| `main.js` | the frame loop and start-up |

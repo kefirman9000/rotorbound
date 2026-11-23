@@ -1,4 +1,4 @@
 {
-  "version": "0.9.0",
-  "notes": "Kamikaze war mode (waves of tanks, trucks, radar, fuel depots, jammers and anti-aircraft guns); landing zones that pay for soft, precise landings; AI racers; film gigs; track builder with share codes; career challenges and lifetime stats; paint shop; realistic battery and video signal range options; speed effects and slow-mo; practice respawn; graphics quality setting."
+  "version": "0.10.0",
+  "notes": "Bigger war explosions (fireballs, shockwave, flying wreckage, burning wrecks) and more detailed enemy vehicles; on-screen target boxes and an edge arrow to the nearest target; AI racers and the film-gig pilot now keep clear of walls; film gigs can follow cars, the blimp or the news helicopter; rebalanced pay (race laps now pay, segments pay, landing and film pay toned down); night lighting (lamp and neon light pools, car headlight beams, wet reflections in rain); faster rendering (static meshes merged, auto resolution, lighter shadows on Medium); Rooftop Run in Rotor City has gates again; the code is now split into files under js/."
 }
